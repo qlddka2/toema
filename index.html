@@ -192,7 +192,7 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
       <div class="row"><button class="btn" data-go="mission">임무·출석<span class="badge hide" id="bdg-mis"></span></button><button class="btn" data-go="ach">업적<span class="badge hide" id="bdg-ach"></span></button></div>
       <div class="row"><button class="btn ghost" data-go="codex">비급 도감</button><button class="btn ghost" data-go="settings">설정</button></div>
       <div id="loginhint" class="lhint hide"></div>
-      <div class="small" style="opacity:.45;margin-top:6px">v3.2</div>
+      <div class="small" style="opacity:.45;margin-top:6px">v3.3</div>
     </div>
     <div style="margin-top:auto;padding-top:16px" class="coins"><i></i><span class="goldv">0</span></div>
   </section>
@@ -243,7 +243,8 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
       <button class="btn gold" id="adfree">광고 제거 · $1.99 (출시 후)</button>
       <button class="btn ghost" id="resetbtn" style="color:#ff8a7a">저장 데이터 초기화</button>
     </div>
-    <div class="note" style="text-align:center">광고는 '광고 자리' 화면으로 대신합니다.</div>
+    <div class="note" id="adnote" style="text-align:center">광고는 '광고 자리' 화면으로 대신합니다.</div>
+    <div class="small" style="text-align:center;margin-top:6px"><a href="https://qlddka2.github.io/toema/privacy.html" target="_blank" rel="noopener" style="color:inherit">개인정보처리방침</a> · Difgames</div>
   </section>
 
   <!-- 임무·출석 -->
@@ -293,10 +294,11 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
   <div id="m-nick" class="modal hide"><div class="mbox"><h3>닉네임</h3><div class="sub">랭킹에 보일 이름</div>
     <input class="nick" id="nickin" maxlength="12"><div class="note" id="nickmsg"></div>
     <div class="row" style="margin-top:10px"><button class="btn" id="nickcancel">취소</button><button class="btn main" id="nicksave">저장</button></div></div></div>
-  <div id="adov" class="hide"><b>광고 자리</b><div>프로토타입에서는 실제 광고 대신 3초 기다려요</div><div id="adcount" style="font-size:40px;color:#fff">3</div></div>
+  <div id="adov" class="hide"><b id="adtitle">광고 자리</b><div id="adsub">프로토타입에서는 실제 광고 대신 3초 기다려요</div><div id="adcount" style="font-size:40px;color:#fff">3</div></div>
 </div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" async onload="window.__sbLoaded&&window.__sbLoaded()"></script>
+<script src="js/native.js"></script>
 <script src="js/i18n_dict.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/data.js"></script>

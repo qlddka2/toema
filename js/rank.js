@@ -36,8 +36,16 @@ async function session(u) {
 }
 const waitReady = async ms => { const t0 = Date.now(); while (!st.ready && Date.now() - t0 < ms) await new Promise(r => setTimeout(r, 100)); };
 
-async function login() { if (!sb) return; try { await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); } catch (e) {} }
-async function logout() { if (!sb) return; try { await sb.auth.signOut(); } catch (e) {} st.user = null; st.nick = ''; onChange(); }
+async function login() {
+  if (!sb) return;
+  if (window.NATIVE && NATIVE.on) {   // 앱: 앱 전용 구글 로그인 → id 토큰으로 Supabase 로그인
+    try { const token = await NATIVE.googleIdToken(); const { error } = await sb.auth.signInWithIdToken({ provider: 'google', token }); if (error) throw error; }
+    catch (e) { const m = (e && e.message) || ''; if (!/cancel/i.test(m)) { st.err = '구글 로그인에 실패했어요'; onChange(); setTimeout(() => { st.err = ''; onChange(); }, 4000); } }
+    return;
+  }
+  try { await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); } catch (e) {}
+}
+async function logout() { if (!sb) return; try { await sb.auth.signOut(); } catch (e) {} if (window.NATIVE && NATIVE.on) await NATIVE.googleLogout(); st.user = null; st.nick = ''; onChange(); }
 async function setNick(n) {
   if (!sb || !st.user) return { ok: false, msg: '로그인이 필요해요.' };
   try { const { data, error } = await sb.rpc('set_nickname', { p_nick: (n || '').trim() }); if (error) throw error; st.nick = data || n; onChange(); return { ok: true }; }

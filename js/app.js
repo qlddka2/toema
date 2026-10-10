@@ -300,6 +300,7 @@ function refreshSync() {
 /* ───── 설정 ───── */
 function renderSettings() {
   $$('#langrow button').forEach(b => b.classList.toggle('on', b.dataset.l === (window.I18N ? I18N.lang : 'ko')));
+  if (window.NATIVE && NATIVE.on) { const ab = $('#adfree'); ab.textContent = SV.adfree ? '광고 제거됨 ✔' : '광고 제거 · ' + (NATIVE.price || '$1.99'); $('#adnote').classList.add('hide'); }
   // 토글 스위치: 켜지면 금색으로 오른쪽
   for (const [id, on] of [['sndbtn', !!SV.snd], ['bgmbtn', SV.bgm !== false], ['vibbtn', !!SV.vib], ['numbtn', !!SV.nums], ['qbtn', !!lowQ]]) { const b = $('#' + id); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }
   const st = RK.state(), cb = $('#cloudbtn'), ci = $('#cloudinfo');
@@ -320,7 +321,15 @@ $('#bgmbtn').onclick = () => { SV.bgm = SV.bgm === false; save(); SND.setOpts({ 
 $('#vibbtn').onclick = () => { SV.vib = !SV.vib; save(); renderSettings(); };
 $('#numbtn').onclick = () => { SV.nums = !SV.nums; save(); renderSettings(); };
 $('#qbtn').onclick = () => { lowQ = !lowQ; resize(); renderSettings(); };
-$('#adfree').onclick = () => toast('스토어 출시 후 구매할 수 있어요');
+$('#adfree').onclick = async () => {
+  if (!(window.NATIVE && NATIVE.on)) return toast('스토어 출시 후 구매할 수 있어요');
+  if (SV.adfree) return toast('이미 광고가 제거됐어요');
+  const msg = await NATIVE.buy(); if (msg) toast(msg);
+};
+if (window.NATIVE && NATIVE.on) {
+  NATIVE.onOwned(() => { if (!SV.adfree) { SV.adfree = true; save(); toast('광고가 제거됐어요. 감사합니다!'); } if (!$('#s-settings').classList.contains('hide')) renderSettings(); });
+  NATIVE.onChange(() => { if (!$('#s-settings').classList.contains('hide')) renderSettings(); });
+}
 $('#resetbtn').onclick = () => { if (confirm((window.I18N ? I18N.t : x => x)('이 기기의 금화·강화·기록·업적이 모두 지워져요. (클라우드에 저장된 데이터는 남아 있어요) 초기화할까요?'))) { SV = blank(); persist(); cloudUid = null; go('menu'); } };
 
 /* ───── 랭킹 화면 ───── */
@@ -510,6 +519,12 @@ $('#nodead').onclick = () => { $('#m-dead').classList.add('hide'); modal = null;
 
 function showAd(done) {
   if (SV.adfree) return done();
+  if (window.NATIVE && NATIVE.on) {   // 앱: 실제 보상형 광고
+    const ov = $('#adov'); $('#adtitle').textContent = '광고 불러오는 중…'; $('#adsub').textContent = ''; $('#adcount').textContent = ''; ov.classList.remove('hide');
+    SND.music('');
+    NATIVE.rewarded(() => { ov.classList.add('hide'); SND.music(running ? fieldMusic() : 'menu'); done(); }, () => { ov.classList.add('hide'); SND.music(running ? fieldMusic() : 'menu'); toast('광고를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요'); });
+    return;
+  }
   const ov = $('#adov'); ov.classList.remove('hide'); let n = 3; $('#adcount').textContent = n;
   const iv = setInterval(() => { n--; $('#adcount').textContent = n; if (n <= 0) { clearInterval(iv); ov.classList.add('hide'); done(); } }, 1000);
 }
@@ -557,8 +572,23 @@ async function finish() {
     rr.innerHTML = out.ok ? `온라인 랭킹 ${out.improved ? '<b style="color:var(--gold)">최고 기록 갱신!</b> ' : ''}현재 <b>${out.rank}</b>위 / ${out.total}명` : '랭킹 기록 실패: ' + out.msg;
   }
 }
-$('#again').onclick = () => { $('#m-res').classList.add('hide'); startRun(); };
-$('#tomenu').onclick = () => { $('#m-res').classList.add('hide'); S = null; go('menu'); };
+/* 전면 광고: 앱에서만, 광고 제거 안 한 사람에게, 3판째부터 3판에 한 번·3분 간격 (결과 화면을 닫을 때) */
+let interN = 0, interAt = 0;
+async function maybeInter(next) {
+  interN++;
+  if (window.NATIVE && NATIVE.on && !SV.adfree && SV.stats.runs >= 3 && interN >= 3 && Date.now() - interAt > 180000) { interN = 0; interAt = Date.now(); SND.music(''); await NATIVE.interstitial(); }
+  next();
+}
+$('#again').onclick = () => { $('#m-res').classList.add('hide'); maybeInter(() => startRun()); };
+$('#tomenu').onclick = () => { $('#m-res').classList.add('hide'); S = null; maybeInter(() => go('menu')); };
+/* 안드로이드 뒤로가기: 게임 중이면 일시정지, 다른 화면이면 메인으로, 메인이면 앱 내리기 */
+if (window.NATIVE && NATIVE.on) NATIVE.onBack(() => {
+  if (running) { if (!modal && !paused) pause(); return; }
+  if (!$('#m-res').classList.contains('hide')) return $('#tomenu').click();
+  const open = [...document.querySelectorAll('.modal:not(.hide)')]; if (open.length) { open.forEach(m => m.classList.add('hide')); return; }
+  const cur = SCR.find(n => !$('#s-' + n).classList.contains('hide'));
+  if (cur && cur !== 'menu') go('menu'); else NATIVE.minimize();
+});
 
 /* ───── HUD ───── */
 let slotSig = '';
@@ -782,7 +812,7 @@ function mobPose(e) {
 const setCoin = () => document.documentElement.style.setProperty('--coin', `url(${A.drop('coin').toDataURL()})`);
 setCoin();
 A.loadImages('img/', () => { setCoin(); if (!$('#s-menu').classList.contains('hide')) renderMenu(); if (!$('#s-select').classList.contains('hide')) renderSelect(); });
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !(window.NATIVE && NATIVE.on)) navigator.serviceWorker.register('sw.js').catch(() => {});   // 앱은 파일이 내장돼 있어 필요 없음
 go('menu');
 window.__toema = { get S() { return S; }, SV: () => SV, go, startRun, cloudOnAuth, pushCloud, pullCloud, resetCloud: () => { cloudUid = null; } };
 })();
