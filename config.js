@@ -8,7 +8,7 @@ window.TOEMA_CONFIG = {
     rewarded: 'ca-app-pub-7930587957278915/6615421871',
     interstitial: 'ca-app-pub-7930587957278915/7928503547',
     removeAdsId: 'remove_ads',          // Play Console 인앱 상품 ID
-    googleWebClientId: '',              // Google Cloud > 사용자 인증 정보 > 'Web client' 클라이언트 ID (Supabase 구글 로그인에 쓰는 것)
+    googleWebClientId: '1032647898801-fai3vemb8tp2ba675md9n5df0svs5h53.apps.googleusercontent.com',              // Google Cloud > 사용자 인증 정보 > 'Web client' 클라이언트 ID (Supabase 구글 로그인에 쓰는 것)
   },
   supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZnBocWRxd3htamt5cG1qdG9rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NTc5NDAsImV4cCI6MjEwNzAzMzk0MH0.4YtLlwxtzx-s0xX7SCQv7mbgN_RIsXpdh6LuFCY9WMI'
 };
