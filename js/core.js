@@ -1,4 +1,4 @@
-/* 퇴마록: 서바이버(가제) — 게임 규칙 코어. 화면(DOM)과 분리되어 있어 자동 시뮬레이션에도 그대로 쓰입니다. */
+/* 퇴마 서바이버 — 게임 규칙 코어. 화면(DOM)과 분리되어 있어 자동 시뮬레이션에도 그대로 쓰입니다. */
 (function (G) {
 const D = G.DATA || (typeof require !== 'undefined' ? require('./data.js') : null);
 const TAU = Math.PI * 2;
@@ -215,8 +215,8 @@ function spawning(S, dt) {
   // 연장전: 1분마다 단계 상승, 정예·우두머리 재등장
   if (S.endless) {
     const sg = Math.min(D.CHAPTERS.length - 1, Math.floor(S.t / D.ENDLESS_SEG));
-    if (sg !== S.seg) { S.seg = sg; const c = D.CHAPTERS[sg]; S.mod.hp = c.hpMul * (S.wk === 'giant' ? 1.6 : 1); S.mod.dmg = c.dmgMul; if (sg > 0) S.ev.push({ k: 'stage', name: c.name }); }
-    if (!S.ot && S.t >= 600) S.ot = { t0: 600, k: 0.5, lv: 0, f: 0, elite: S.t + 30, boss: D.ENDLESS_SEG * D.CHAPTERS.length + D.OT.bossEvery, bi: 0, bosses: 0, endless: true };
+    if (sg !== S.seg) { S.seg = sg; const c = D.CHAPTERS[sg], H = S.hard ? D.HARD : null; S.mod.hp = c.hpMul * (S.wk === 'giant' ? 1.6 : 1) * (H ? H.hpMul : 1); S.mod.dmg = c.dmgMul * (H ? H.dmgMul : 1); if (sg > 0) S.ev.push({ k: 'stage', name: c.name }); }
+    if (!S.ot && S.t >= 600) S.ot = { t0: 600, k: S.hard ? 0.7 : 0.5, lv: 0, f: 0, elite: S.t + 30, boss: D.ENDLESS_SEG * D.CHAPTERS.length + D.OT.bossEvery, bi: 0, bosses: 0, endless: true };
   }
   const O = S.ot;
   if (O) {

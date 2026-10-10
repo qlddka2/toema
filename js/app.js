@@ -1,4 +1,4 @@
-/* 퇴마 서바이버(가제) — 화면·조작·흐름·보상 */
+/* 퇴마 서바이버 — 화면·조작·흐름·보상 */
 (function () {
 'use strict';
 const D = window.DATA, C = window.CORE, A = window.ART, RK = window.RANK;
@@ -134,14 +134,14 @@ function renderSelect() {
     d.onclick = () => { if (locked) return; SV.ch = ch.id; save(); SND.play('click'); renderSelect(); };
     CH.appendChild(d);
   }
-  if (!SV.hard) {   // 무한 모드
-    const ok = !!SV.clear[5], wk = D.weekly(), eb = SV.best[1000 + D.weekNo()], d = document.createElement('button');
-    d.className = 'ch endless' + (SV.ch === 6 ? ' on' : ''); if (!ok) d.disabled = true;
-    d.innerHTML = `<div class="n">∞</div><div><b>백귀야행</b><small>${ok ? `이번 주 조건: <b>${wk.name}</b> · ${wk.desc}` : '🔒 보통 5장을 클리어하면 열려요'}</small>${ok ? '<small class="cond">끝없는 요괴 행렬 · 주간 랭킹</small>' : ''}</div><div class="best">${eb ? '이번 주 최고<br>' + eb.score.toLocaleString() : ''}</div>`;
+  {   // 무한 모드 (보통·어려움 각각, 3장 클리어 시 열림)
+    const ok = endlessOk(SV.hard), wk = D.weekly(), eb = SV.best[D.ekey(SV.hard)], d = document.createElement('button');
+    d.className = 'ch endless' + (SV.ch === 6 ? ' on' : '') + (SV.hard ? ' hard' : ''); if (!ok) d.disabled = true;
+    d.innerHTML = `<div class="n">∞</div><div><b>${SV.hard ? '백귀야행 (어려움)' : '백귀야행'}</b><small>${ok ? `이번 주 조건: <b>${wk.name}</b> · ${wk.desc}` : (SV.hard ? '🔒 어려움 3장을 클리어하면 열려요' : '🔒 보통 3장을 클리어하면 열려요')}</small>${ok ? `<small class="cond">${SV.hard ? '처음부터 강한 요괴 행렬 · 어려움 주간 랭킹' : '끝없는 요괴 행렬 · 주간 랭킹'}</small>` : ''}</div><div class="best">${eb ? '이번 주 최고<br>' + eb.score.toLocaleString() : ''}</div>`;
     d.onclick = () => { if (!ok) return; SV.ch = 6; save(); SND.play('click'); renderSelect(); };
     CH.appendChild(d);
   }
-  const chOk = c => c === 6 ? !SV.hard && !!SV.clear[5] : SV.hard ? !!SV.clear[c] : (c === 1 || !!SV.clear[c - 1]);
+  const chOk = c => c === 6 ? endlessOk(SV.hard) : SV.hard ? !!SV.clear[c] : (c === 1 || !!SV.clear[c - 1]);
   if (!chOk(SV.ch)) { SV.ch = 1; if (!chOk(1)) { SV.hard = false; } renderSelect(); }
 }
 $('#gobtn').onclick = () => startRun();
@@ -319,23 +319,24 @@ $('#resetbtn').onclick = () => { if (confirm(I18N.t('이 기기의 금화·강�
 
 /* ───── 랭킹 화면 ───── */
 let rkCh = 1, rkHard = false;
-const rkKey = () => rkCh === 6 ? 1000 + D.weekNo() : rkCh + (rkHard ? 10 : 0);
+const rkKey = () => rkCh === 6 ? D.ekey(rkHard) : rkCh + (rkHard ? 10 : 0);
+const endlessOk = hard => !!(hard ? SV.hclear : SV.clear)[D.ENDLESS_UNLOCK] || (!hard && !!SV.clear[5]);
 $$('#rktabs button').forEach(b => b.onclick = () => { rkCh = +b.dataset.ch; renderRank(); });
 $$('#rkdiff button').forEach(b => b.onclick = () => { rkHard = b.dataset.d === 'h'; renderRank(); });
 async function renderRank() {
   $$('#rktabs button').forEach(x => x.classList.toggle('on', +x.dataset.ch === rkCh));
   $$('#rkdiff button').forEach(x => x.classList.toggle('on', (x.dataset.d === 'h') === rkHard));
   const me = $('#rkme'), list = $('#rklist'), st = RK.state(), key = rkKey();
-  $('#rkdiff').classList.toggle('hide', rkCh === 6); $('#rknote').textContent = rkCh === 6 ? `이번 주 조건: ${D.weekly().name} (${D.weekly().desc}) · 점수 = 생존 초×10 + 처치 수 + 우두머리 처치×2,000 · 매주 월요일 초기화` : '점수 = 생존 초×10 + 처치 수 + 중간보스 1,500 + 클리어 5,000 + 빠른 보스 처치 보너스 + 연장전 1초당 40';
+  $('#rknote').textContent = rkCh === 6 ? `이번 주 조건: ${D.weekly().name} (${D.weekly().desc}) · 점수 = 생존 초×10 + 처치 수 + 우두머리 처치×2,000 · 매주 월요일 초기화` : '점수 = 생존 초×10 + 처치 수 + 중간보스 1,500 + 클리어 5,000 + 빠른 보스 처치 보너스 + 연장전 1초당 40';
   const local = SV.best[key];
   $('#rkuser').textContent = st.user ? st.nick : '';
-  let meHtml = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><div class="small">${rkCh === 6 ? '백귀야행 · 이번 주' : D.CHAPTERS[rkCh - 1].name + (rkHard ? ' · 어려움' : '')} · 내 최고 (이 기기)</div><b style="font-size:20px">${local ? local.score.toLocaleString() : '-'}</b></div>`;
+  let meHtml = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><div class="small">${rkCh === 6 ? (rkHard ? '백귀야행 · 어려움 · 이번 주' : '백귀야행 · 이번 주') : D.CHAPTERS[rkCh - 1].name + (rkHard ? ' · 어려움' : '')} · 내 최고 (이 기기)</div><b style="font-size:20px">${local ? local.score.toLocaleString() : '-'}</b></div>`;
   if (!st.avail) meHtml += `<div class="small" style="text-align:right">${st.err || '온라인 랭킹 연결 중…'}</div>`;
   else if (!st.user) meHtml += `<button class="btn gold" id="rklogin" style="padding:10px 14px;font-size:14px">Google 로그인</button>`;
   else meHtml += `<div style="text-align:right"><button class="btn" id="rknick" style="padding:8px 12px;font-size:13px">닉네임 변경</button><button class="btn ghost" id="rklogout" style="padding:6px;font-size:12px">로그아웃</button></div>`;
   meHtml += '</div>';
   if (st.user) meHtml += `<div class="note" id="rkmine">서버 기록 불러오는 중…</div>`;
-  else if (st.avail) meHtml += `<div class="note">로그인하면 기록이 온라인 랭킹에 올라가요. 맞수와 같은 계정을 써요.</div>`;
+  else if (st.avail) meHtml += `<div class="note">로그인하면 기록이 온라인 랭킹에 올라가요.</div>`;
   me.innerHTML = meHtml;
   const lb = $('#rklogin'); if (lb) lb.onclick = () => RK.login();
   const lo = $('#rklogout'); if (lo) lo.onclick = async () => { await RK.logout(); renderRank(); };
@@ -390,9 +391,9 @@ function startRun() {
   $('#hud').classList.remove('hide'); $('#bossbar').classList.add('hide');
   running = true; last = performance.now(); paused = false; slotSig = '';
   SND.music(fieldMusic());
-  if (S.endless) banner('백귀야행', '이번 주 조건 · ' + D.weekly().name); else banner(S.ch.id + '장 · ' + S.ch.name + (S.hard ? ' (어려움)' : ''), '살아남아 우두머리를 쓰러뜨려라');
+  if (S.endless) banner(S.hard ? '백귀야행 (어려움)' : '백귀야행', '이번 주 조건 · ' + D.weekly().name); else banner(S.ch.id + '장 · ' + S.ch.name + (S.hard ? ' (어려움)' : ''), '살아남아 우두머리를 쓰러뜨려라');
   tutT = SV.tut ? 0 : 6; $('#tut').classList.toggle('hide', !!SV.tut);
-  runId = null; RK.start(SV.ch === 6 ? 1000 + D.weekNo() : SV.ch + (SV.hard ? 10 : 0), SV.hero).then(id => { runId = id; });
+  runId = null; RK.start(SV.ch === 6 ? D.ekey(SV.hard) : SV.ch + (SV.hard ? 10 : 0), SV.hero).then(id => { runId = id; });
   requestAnimationFrame(loop);
 }
 let paused = false, modal = null;
@@ -509,7 +510,7 @@ function showAd(done) {
 
 async function finish() {
   running = false; $('#hud').classList.add('hide'); $('#tut').classList.add('hide');
-  const r = C.result(S), ch = S.ch.id, cleared = r.cleared, key = S.endless ? 1000 + (S.week || D.weekNo()) : ch + (S.hard ? 10 : 0);
+  const r = C.result(S), ch = S.ch.id, cleared = r.cleared, key = S.endless ? D.ekey(S.hard, S.week || D.weekNo()) : ch + (S.hard ? 10 : 0);
   const notes = [];
   if (S.over !== 'quit') {
     SV.stats.runs++; SV.stats.kills += r.kills; SV.stats.bosses += r.bosses; SV.stats.maxLv = Math.max(SV.stats.maxLv, r.lv);
@@ -536,7 +537,7 @@ async function finish() {
   if (pendingPull) { pendingPull = false; setTimeout(pullCloud, 500); }
   $('#restitle').textContent = S.endless ? (S.over === 'quit' ? '후퇴' : '백귀야행 종료') : cleared ? '퇴마 성공!' : S.over === 'quit' ? '후퇴' : '퇴마 실패';
   $('#restitle').style.color = cleared || (S.endless && S.over !== 'quit') ? '' : '#ff8a7a';
-  $('#ressub').textContent = S.endless ? `백귀야행 · 우두머리 ${r.bosses}마리 처치 · ${D.HEROES[S.heroId].name}` : `${ch}장 ${S.ch.name}${S.hard ? ' (어려움)' : ''} · ${D.HEROES[S.heroId].name}${r.ot ? ` · 연장전 ${fmt(r.ot)}` : ''}` + (cleared && !S.hard && ch < D.CHAPTERS.length && !(prev && prev.cleared) ? ` · ${ch + 1}장이 열렸어요!` : '');
+  $('#ressub').textContent = S.endless ? `백귀야행${S.hard ? ' (어려움)' : ''} · 우두머리 ${r.bosses}마리 처치 · ${D.HEROES[S.heroId].name}` : `${ch}장 ${S.ch.name}${S.hard ? ' (어려움)' : ''} · ${D.HEROES[S.heroId].name}${r.ot ? ` · 연장전 ${fmt(r.ot)}` : ''}` + (cleared && !S.hard && ch < D.CHAPTERS.length && !(prev && prev.cleared) ? ` · ${ch + 1}장이 열렸어요!` : '');
   $('#resgrid').innerHTML = [[r.ot ? '연장전' : '생존 시간', r.ot ? fmt(r.ot) : fmt(r.t)], ['처치', r.kills.toLocaleString()], ['레벨', r.lv], ['획득 금화', `<span id="rgold">${r.gold.toLocaleString()}</span>`], ['점수', S.over === 'quit' ? '-' : r.score.toLocaleString()], ['내 최고', SV.best[key] ? SV.best[key].score.toLocaleString() : '-']].map(([a, b]) => `<div><small>${a}</small><b>${b}</b></div>`).join('');
   $('#resnotes').innerHTML = notes.map(n => `<div>✦ ${esc(n)}</div>`).join('');
   const dbl = $('#dbl'); dbl.disabled = r.gold <= 0; dbl.textContent = '▶ 광고 보고 금화 2배';

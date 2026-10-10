@@ -1,4 +1,4 @@
-/* 퇴마 서바이버(가제) — 소리. 파일 없이 브라우저에서 직접 합성합니다.
+/* 퇴마 서바이버 — 소리. 파일 없이 브라우저에서 직접 합성합니다.
    효과음 + 국악풍 배경음(가야금 뜯는 소리·북·대금 비슷한 음색, 5음계) */
 (function () {
 let ac = null, master = null, sfxBus = null, bgmBus = null, synthBus = null, noiseBuf = null;

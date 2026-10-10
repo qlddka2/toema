@@ -1,4 +1,4 @@
-/* 퇴마 서바이버(가제) — 온라인 랭킹 (Supabase, 맞수와 같은 프로젝트·계정) */
+/* 퇴마 서바이버 — 온라인 랭킹 (Supabase) */
 (function () {
 const st = { avail: false, ready: false, user: null, nick: '', err: '', askNick: false };
 let sb = null, onChange = () => {};

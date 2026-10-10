@@ -1,4 +1,4 @@
--- 퇴마 서바이버(가제) · 랭킹
+-- 퇴마 서바이버 · 랭킹
 -- 맞수와 같은 Supabase 프로젝트에서 실행하세요 (profiles·set_nickname은 맞수 schema.sql에 이미 있음).
 -- SQL Editor → New query → 통째로 붙여넣고 Run. 여러 번 실행해도 안전합니다.
 
@@ -38,7 +38,7 @@ revoke insert, update, delete, truncate on public.sv_best from anon, authenticat
 grant select on public.sv_best to anon, authenticated;
 
 -- v2.2: 연장전·백귀야행(무한 모드) 지원. 이전 버전 위에 그대로 다시 실행하면 됩니다.
---   챕터 번호: 1~5 보통, 11~15 어려움, 1000+주번호 = 백귀야행 주간 랭킹
+--   챕터 번호: 1~5 보통, 11~15 어려움, 1000+주번호 = 백귀야행 주간 랭킹, 5000+주번호 = 어려움 백귀야행 (v3.1)
 alter table public.sv_runs add column if not exists ot int;
 alter table public.sv_runs add column if not exists bosses int;
 alter table public.sv_runs drop constraint if exists sv_runs_chapter_check;
@@ -56,7 +56,7 @@ declare rid uuid; n int;
 begin
   if auth.uid() is null then raise exception 'not_authenticated'; end if;
   if p_chapter is null or p_hero is null or p_hero !~ '^[a-z]{2,16}$'
-     or not (p_chapter between 1 and 5 or p_chapter between 11 and 15 or p_chapter = 1000 + public.sv_week()) then raise exception 'invalid'; end if;
+     or not (p_chapter between 1 and 5 or p_chapter between 11 and 15 or p_chapter = 1000 + public.sv_week() or p_chapter = 5000 + public.sv_week()) then raise exception 'invalid'; end if;
   insert into public.profiles (id, nickname)
     values (auth.uid(), '플레이어' || substr(replace(auth.uid()::text, '-', ''), 1, 6)) on conflict (id) do nothing;
   select count(*) into n from public.sv_runs where user_id = auth.uid() and started_at > now() - interval '10 minutes';

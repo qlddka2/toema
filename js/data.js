@@ -1,7 +1,7 @@
-/* 퇴마록: 서바이버(가제) — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
+/* 퇴마 서바이버 — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
 (function (G) {
 const D = {};
-D.VERSION = '3.0.0';
+D.VERSION = '3.1.2';
 
 /* ───── 주인공 ─────
    unlock: 해금 조건 (없으면 처음부터) */
@@ -493,6 +493,9 @@ D.ENDLESS = (() => {
   return { id: 6, endless: true, name: '백귀야행', sub: '온갖 요괴가 밤길을 행진한다', theme: 'night', hpMul: 1.15, dmgMul: 1.05, clearGold: 0, firstGold: 0, waves, events };
 })();
 D.escore = (t, kills, bosses) => 10 * t + kills + 2000 * bosses;
+/* 랭킹 번호: 보통 백귀야행 1000+주, 어려움 백귀야행 5000+주 / 해금: 보통·어려움 3장 클리어 */
+D.ekey = (hard, w = D.weekNo()) => (hard ? 5000 : 1000) + w;
+D.ENDLESS_UNLOCK = 3;
 /* 주간 조건: 매주 월요일에 바뀜. 주간 랭킹 번호 = 1000 + 주 번호 */
 D.weekNo = (ms = Date.now()) => Math.floor((ms / 86400000 + 3) / 7);
 D.WEEKLY = [
