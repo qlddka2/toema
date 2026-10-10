@@ -820,3 +820,27 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 결제가 완료되지 않았어요	The purchase wasn't completed	購入が完了しませんでした	购买未完成
 구글 로그인에 실패했어요	Google sign-in failed	Googleログインに失敗しました	Google 登录失败
 개인정보처리방침	Privacy Policy	プライバシーポリシー	隐私政策
+권장 전투력 {n} · 내 전투력 {n}	Recommended power {0} · Your power {1}	推奨戦闘力 {0} · 自分の戦闘力 {1}	推荐战力 {0} · 我的战力 {1}
+권장 전투력 {n}에 못 미쳐요 (내 전투력 {n}). 강화와 주인공 성장으로 전투력을 올려 보세요	Below the recommended power {0} (yours: {1}). Raise it with upgrades and hero growth	推奨戦闘力 {0} に届いていません（自分 {1}）。強化と主人公の成長で戦闘力を上げましょう	未达到推荐战力 {0}（我的战力 {1}）。通过强化和主角成长提升战力吧
+강화하러 가기	Go upgrade	強化へ	去强化
+## ── v3.6 백귀야행 전용 우두머리 ──
+{s} 분열!	{0} splits!	{0}が分裂！	{0}分裂了！
+백귀야행 전용 우두머리 ({n} / {n})	Night Parade bosses ({0} / {1})	百鬼夜行限定ボス（{0} / {1}）	百鬼夜行专属首领（{0} / {1}）
+백귀야행에서 만날 수 있어요	Encountered in the Night Parade	百鬼夜行で出会えます	可在百鬼夜行中遇到
+그슨대	Geuseundae	グスンデ	格森大
+어둠 속에서 자라나는 그림자	A shadow that grows in the dark	闇の中で伸びる影	在黑暗中滋长的影子
+어둑시니	Eoduksini	オドゥクシニ	暗鬼
+쳐다볼수록 커지는 어둠	Darkness that grows as you stare	見つめるほど大きくなる闇	越看越大的黑暗
+장산범	Jangsan Tiger	チャンサンボム	长山虎
+사람 목소리를 흉내 내는 흰 짐승	A white beast that mimics human voices	人の声を真似る白い獣	模仿人声的白色野兽
+손각시	Songaksi	ソンガクシ	孙闺女
+시집 못 간 처녀의 한	The grudge of a maiden who never wed	嫁げなかった娘の恨み	未嫁少女的怨念
+강철이	Gangcheori	カンチョリ	旱火龙马
+지나간 자리마다 가뭄이 드는 불의 용마	A fire dragon-horse that leaves drought in its wake	通った跡に日照りを招く炎の竜馬	所过之处皆成旱地的火之龙马
+두억시니	Dueoksini	ドゥオクシニ	压首鬼
+머리를 짓누르는 사나운 귀신	A fierce demon that crushes skulls	頭を押し潰す荒ぶる鬼	碾压头颅的凶恶鬼怪
+삼두구미	Samdugumi	サムドゥグミ	三头九尾
+머리 셋, 꼬리 아홉의 땅속 괴물	A three-headed, nine-tailed beast from below	三つの頭と九つの尾を持つ地底の怪物	三头九尾的地底怪物
+염라대왕	King Yeomra	閻魔大王	阎罗王
+저승의 심판관	Judge of the Underworld	冥府の裁判官	冥府的审判者
+우두머리	Bosses	ボス	首领

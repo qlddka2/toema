@@ -29,7 +29,7 @@ function newRun(o) {
   const hero = D.HEROES[o.hero], ch = o.chapter === 6 ? Object.assign({}, D.ENDLESS) : D.CHAPTERS[o.chapter - 1], meta = o.meta || {}, hard = !!o.hard, H = D.HARD, hlv = Math.max(1, Math.min(D.HERO_LV.max, o.hlv || 1)), hm = D.heroMods(o.hero, hlv);
   const S = {
     t: 0, R: rng(o.seed || (Math.random() * 1e9) | 0), heroId: o.hero, hero, ch, meta, hard, endless: !!ch.endless, week: ch.endless ? D.weekNo() : 0, wk: ch.endless ? (o.weekly || D.weekly().id) : '', seg: -1, viewR: o.viewR || 420,
-    mod: { hp: ch.hpMul * (hard ? H.hpMul : 1), dmg: ch.dmgMul * (hard ? H.dmgMul : 1), spawn: hard ? H.spawnMul : 1, bossHp: hard ? H.hpMul : 1 },
+    mod: { hp: D.TIER.hp[D.tierOf(ch.endless ? 1 : ch.id, hard)], dmg: D.TIER.dmg[D.tierOf(ch.endless ? 1 : ch.id, hard)], spawn: hard ? H.spawnMul : 1, bossHp: D.TIER.boss[D.tierOf(ch.endless ? 1 : ch.id, hard)] },
     goldBase: (hard ? H.goldMul : 1) * (hero.goldMul || 1) * (1 + (meta.greed || 0) * D.META.greed.per) * (1 + (hm.gold || 0)), goldMul: 1, hlv, hm,
     p: { x: 0, y: 0, vx: 0, vy: 0, r: 12, hp: 1, maxhp: 1, fx: 1, fy: 0, face: 1, hurt: 0, moving: false, chill: 0, hzcd: 0 },
     W: [], P: {}, lv: 1, xp: 0, need: D.xpNeed(1), pendingLv: 0, chests: 0, chestN: [],
@@ -201,7 +201,7 @@ function spawnBoss(S, id) {
     const bx = Math.cos(a), by = Math.sin(a), L = (B.segs + 2) * 17;
     for (let d = 0; d <= L; d += 3) { const w = Math.sin(d / 40) * 18; e.trail.push([e.x + bx * d - by * w, e.y + by * d + bx * w]); }
   }
-  S.ev.push({ k: 'boss', name: B.name, sub: B.sub, final: e.final, spr: B.spr });
+  S.ev.push({ k: 'boss', id, name: B.name, sub: B.sub, final: e.final, spr: B.spr });
 }
 function spawning(S, dt) {
   const ch = S.ch;
@@ -216,7 +216,7 @@ function spawning(S, dt) {
   // 연장전: 1분마다 단계 상승, 정예·우두머리 재등장
   if (S.endless) {
     const sg = Math.min(D.CHAPTERS.length - 1, Math.floor(S.t / D.ENDLESS_SEG));
-    if (sg !== S.seg) { S.seg = sg; const c = D.CHAPTERS[sg], H = S.hard ? D.HARD : null; S.mod.hp = c.hpMul * (S.wk === 'giant' ? 1.6 : 1) * (H ? H.hpMul : 1); S.mod.dmg = c.dmgMul * (H ? H.dmgMul : 1); if (sg > 0) S.ev.push({ k: 'stage', name: c.name }); }
+    if (sg !== S.seg) { S.seg = sg; const c = D.CHAPTERS[sg], ti = D.tierOf(sg + 1, S.hard); S.mod.hp = D.TIER.hp[ti] * (S.wk === 'giant' ? 1.6 : 1); S.mod.dmg = D.TIER.dmg[ti]; S.mod.bossHp = D.TIER.boss[ti]; if (sg > 0) S.ev.push({ k: 'stage', name: c.name }); }
     if (!S.ot && S.t >= 600) S.ot = { t0: 600, k: S.hard ? 0.7 : 0.5, lv: 0, f: 0, elite: S.t + 30, boss: D.ENDLESS_SEG * D.CHAPTERS.length + D.OT.bossEvery, bi: 0, bosses: 0, endless: true };
   }
   const O = S.ot;
@@ -224,7 +224,7 @@ function spawning(S, dt) {
     O.f = (O.start || 0) + (S.t - O.t0) / (O.step || 60) * (O.k || 1); const lv = Math.floor(O.f);
     if (lv > O.lv) { O.lv = lv; const g = D.OT.gold(lv); addGold(S, g); S.ev.push({ k: 'otlv', lv, gold: Math.round(g * S.goldMul) }); }
     if (S.t >= O.elite && !(O.endless && S.t < D.ENDLESS_SEG * D.CHAPTERS.length)) { O.elite = S.t + D.OT.eliteEvery; const el = ch.events.filter(v => v[1] === 'elite'); if (el.length) { const a = el[(S.R() * el.length) | 0][2]; for (let i = 0; i < 1 + (O.lv >> 1); i++) { const [x, y] = ringPos(S, S.viewR + 20); mkEnemy(S, a, x, y); } S.ev.push({ k: 'warn', txt: D.ENEMIES[a].name + ' 무리 출현' }); } }
-    if (S.t >= O.boss && !S.boss) { O.boss = S.t + D.OT.bossEvery; const bs = ch.events.filter(v => v[1] === 'boss').map(v => v[2]); S.otBoss = true; spawnBoss(S, bs[O.bi++ % bs.length]); S.otBoss = false; }
+    if (S.t >= O.boss && !S.boss) { O.boss = S.t + D.OT.bossEvery; const bs = ch.otBosses || ch.events.filter(v => v[1] === 'boss').map(v => v[2]); S.otBoss = true; spawnBoss(S, bs[O.bi++ % bs.length]); S.otBoss = false; }
   }
   const rate = wv[1] * S.mod.spawn * (S.boss ? 0.45 : 1) * (O ? D.OT.rate(O.lv) : 1);
   S.spawnAcc += rate * dt;
@@ -255,7 +255,9 @@ function hurtEnemy(S, e, dmg, kx, ky) {
 function kill(S, e) {
   e.dead = true;
   S.fx.push({ k: 'pop', x: e.x, y: e.y, r: e.r, t: 0.3, c: e.elite || e.boss ? '#ffd36b' : '#b9ff9a' });
+  if (e.clone) { addGold(S, 10); S.drops.push({ k: 'bag', x: e.x, y: e.y }); return; }   // 어둑시니 분신
   if (e.boss) {
+    for (const o of S.en) if (o.clone && !o.dead) { o.dead = true; S.fx.push({ k: 'pop', x: o.x, y: o.y, r: o.r, t: 0.4, c: '#ffd36b' }); }
     if (e.segs) for (const s of e.segs) { s.dead = true; S.fx.push({ k: 'pop', x: s.x, y: s.y, r: s.r, t: 0.4, c: '#ffd36b' }); }
     S.boss = null; S.arena = null; S.bosses++; addGold(S, e.gold); S.hz.length = 0; S.warn.length = 0; S.hornUsed = false;
     S.drops.push({ k: 'chest', x: e.x, y: e.y, n: e.final ? 1 : 2 });
@@ -655,7 +657,7 @@ function enemies(S, dt) {
       if (Math.abs(dx) > 0.1) e.face = dx > 0 ? 1 : -1;
     }
     const kd = Math.exp(-9 * dt); e.kx *= kd; e.ky *= kd;
-    if (e.hitcd <= 0 && hyp(p.x - e.x, p.y - e.y) < p.r + e.r - 2) { e.hitcd = 0.6; e.bite = 0.28; e.ba = Math.atan2(p.y - e.y, p.x - e.x); hurtPlayer(S, e.boss && e.st === 'dash' ? e.dmg * 1.3 : e.dmg, e.boss ? 'boss' : 'mob'); }
+    if (e.hitcd <= 0 && !e.vanish && hyp(p.x - e.x, p.y - e.y) < p.r + e.r - 2) { e.hitcd = 0.6; e.bite = 0.28; e.ba = Math.atan2(p.y - e.y, p.x - e.x); hurtPlayer(S, e.boss && e.st === 'dash' ? e.dmg * 1.3 : e.dmg, e.boss ? 'boss' : 'mob'); }
   }
   // 겹침 밀어내기
   for (const e of S.en) {
@@ -683,7 +685,7 @@ function enemies(S, dt) {
   S.ep = keep;
   // 예고 후 떨어지는 공격
   const wk = [];
-  for (const w of S.warn) { w.t -= dt; if (w.t <= 0) { if (hyp(p.x - w.x, p.y - w.y) < w.r + p.r - 4) hurtPlayer(S, w.dmg, 'rain', w.k); S.fx.push({ k: 'blast', x: w.x, y: w.y, r: w.r, t: 0.35, c: w.k }); } else { wk.push(w); S.tele.push({ k: 'circle', x: w.x, y: w.y, r: w.r, p: 1 - w.t / w.t0 }); } }
+  for (const w of S.warn) { if (w.hold > 0) { w.hold -= dt; wk.push(w); continue; } w.t -= dt; if (w.t <= 0) { if (hyp(p.x - w.x, p.y - w.y) < w.r + p.r - 4) hurtPlayer(S, w.dmg, 'rain', w.k); S.fx.push({ k: 'blast', x: w.x, y: w.y, r: w.r, t: 0.35, c: w.k }); if (w.pool) S.hz.push({ x: w.x, y: w.y, r: w.r * 0.85, t: w.pool.life, t0: w.pool.life, dmg: w.pool.dmg * S.mod.dmg, k: w.k }); } else { wk.push(w); S.tele.push({ k: 'circle', x: w.x, y: w.y, r: w.r, p: 1 - w.t / w.t0 }); } }
   S.warn = wk;
   // 위험 지대(불길)
   p.hzcd -= dt; const hk = [];
@@ -699,18 +701,48 @@ function fire(S, b, a) {
   if (a.t === 'ring') { const off = S.R() * TAU; for (let i = 0; i < n; i++) shoot(S, b.x, b.y, off + i / n * TAU, a.spd, a.dmg, { k: a.k }); }
   else if (a.t === 'spread') { for (let i = 0; i < n; i++) shoot(S, b.x, b.y, toP + (n > 1 ? (i / (n - 1) - 0.5) * a.ang : 0), a.spd, a.dmg, { k: a.k }); }
   else if (a.t === 'homing') { for (let i = 0; i < n; i++) shoot(S, b.x, b.y, toP + (i - (n - 1) / 2) * 0.6, a.spd, a.dmg, { home: a.turn, life: 4.2, r: 8, k: 'fire' }); }
-  else if (a.t === 'rain') { for (let i = 0; i < n; i++) { const ang = S.R() * TAU, d = i === 0 ? 0 : 40 + S.R() * 130; let x = p.x + Math.cos(ang) * d + p.vx * 0.4, y = p.y + Math.sin(ang) * d + p.vy * 0.4; S.warn.push({ x, y, r: a.r, t: a.delay, t0: a.delay, dmg: a.dmg * S.mod.dmg, k: a.k }); } }
+  else if (a.t === 'rain') { for (let i = 0; i < n; i++) { const ang = S.R() * TAU, d = i === 0 ? 0 : 40 + S.R() * 130; let x = p.x + Math.cos(ang) * d + p.vx * 0.4, y = p.y + Math.sin(ang) * d + p.vy * 0.4; S.warn.push({ x, y, r: a.r, t: a.delay, t0: a.delay, dmg: a.dmg * S.mod.dmg, k: a.k, pool: a.pool }); } }
+  else if (a.t === 'wall') {
+    // 탄막 벽: 플레이어 쪽으로 밀려오는 한 줄, 한 군데만 빈틈
+    const walls = a.cross ? [toP, toP + Math.PI / 2] : [toP];
+    for (const wa of walls) {
+      const ux = Math.cos(wa), uy = Math.sin(wa), cx = p.x - ux * 300, cy = p.y - uy * 300, gap = (S.R() - 0.5) * a.w * 0.6, step = 26;
+      for (let o = -a.w / 2; o <= a.w / 2; o += step) { if (Math.abs(o - gap) < a.gap / 2) continue; S.ep.push({ x: cx - uy * o, y: cy + ux * o, vx: ux * a.spd, vy: uy * a.spd, r: 8, dmg: a.dmg * S.mod.dmg, life: 5.5, home: 0, k: a.k }); }
+    }
+  }
+  else if (a.t === 'tri') {
+    // 세 머리가 세 방향으로
+    for (let h = 0; h < 3; h++) { const base = toP + (h - 1) * 2.1; for (let i = 0; i < n; i++) shoot(S, b.x, b.y, base + (n > 1 ? (i / (n - 1) - 0.5) * a.ang : 0), a.spd, a.dmg, { k: a.k }); }
+  }
+  else if (a.t === 'judge') {
+    // 심판의 원: 1차로 안쪽 큰 원이 터지고, 바로 이어서 그 바깥 고리가 터짐 → 밖으로 피했다가 다시 안으로
+    const cx = p.x, cy = p.y, rot = S.R() * TAU, inv = b.rage && S.R() < 0.5;   // 분노 시 절반 확률로 순서 반대
+    const inner = [[cx, cy, a.r]], outer = [];
+    for (let i = 0; i < 10; i++) { const an = rot + i / 10 * TAU; outer.push([cx + Math.cos(an) * a.r * 1.6, cy + Math.sin(an) * a.r * 1.6, a.r * 0.56]); }
+    const [w1, w2] = inv ? [outer, inner] : [inner, outer];
+    for (const [x, y, r] of w1) S.warn.push({ x, y, r, t: a.delay, t0: a.delay, dmg: a.dmg * S.mod.dmg, k: a.k });
+    for (const [x, y, r] of w2) S.warn.push({ x, y, r, t: a.gap, t0: a.gap, hold: a.delay, dmg: a.dmg * S.mod.dmg, k: a.k });
+  }
   else if (a.t === 'summon') { for (let i = 0; i < n; i++) { const an = i / n * TAU; const e = mkEnemy(S, a.type, b.x + Math.cos(an) * 60, b.y + Math.sin(an) * 60); } }
   b.cast = 0.35; b.ca = toP; S.ev.push({ k: 'sfx', s: 'bossatk' });
 }
+/* 어둑시니: 체력 절반에서 분신이 갈라져 나옴 (분신은 체력 25%, 공격 방식 동일, 처치 시 금화) */
+function splitBoss(S, b, n) {
+  for (let i = 0; i < n; i++) {
+    const an = S.R() * TAU, hp = Math.round(b.max * 0.25);
+    const c = Object.assign({}, b, { id: S.uid++, clone: true, boss: true, spr: b.spr + '_s', r: b.r * 0.7, hp, max: hp, x: b.x + Math.cos(an) * 50, y: b.y + Math.sin(an) * 50, hb: {}, st: 'idle', tm: 0.8 + i * 0.6, ai: i + 1, rage: true, segs: null, gold: 0, final: false, spd: b.spd * 1.15, dmg: b.dmg * 0.7 });
+    S.en.push(c); S.fx.push({ k: 'ring', x: c.x, y: c.y, r: 60, t: 0.4, c: '#9a7ad8' });
+  }
+  S.ev.push({ k: 'warn', txt: b.name + ' 분열!' });
+}
 function bossAI(S, b, dt) {
   const p = S.p, B = b.def, dx = p.x - b.x, dy = p.y - b.y, d = hyp(dx, dy) || 1, toP = Math.atan2(dy, dx);
-  if (!b.rage && b.hp < b.max * 0.5) { b.rage = true; S.ev.push({ k: 'rage', name: b.name }); }
+  if (!b.rage && b.hp < b.max * 0.5) { b.rage = true; S.ev.push({ k: 'rage', name: b.name }); if (B.rage && B.rage.split && !b.clone) splitBoss(S, b, B.rage.split); }
   const R = b.rage && B.rage || {}, list = R.atk || B.atk, mul = R.mul || {};
   b.tm -= dt; if (Math.abs(dx) > 1) b.face = dx > 0 ? 1 : -1;
   const mv = (a, sp) => { b.x += Math.cos(a) * sp * dt; b.y += Math.sin(a) * sp * dt; };
   const A = S.arena;
-  const lock = b.st === 'aim' || b.st === 'dash' || b.st === 'rest' || b.st === 'stomp' || b.st === 'blink';
+  const lock = b.st === 'aim' || b.st === 'dash' || b.st === 'rest' || b.st === 'stomp' || b.st === 'blink' || b.st === 'ambush' || b.st === 'breath' || b.st === 'slam' || b.st === 'sweep';
   // 이동
   if (B.move === 'snake') {
     const turn = b.st === 'charge' ? 1.1 : 2.2, sp = b.st === 'charge' ? b.cs : b.st === 'aim' ? 0 : b.spd;
@@ -733,8 +765,25 @@ function bossAI(S, b, dt) {
       else if (a.t === 'charge') { b.st = 'aim'; b.tm = a.aim; b.cs = a.spd; }
       else if (a.t === 'stomp') { b.st = 'stomp'; b.tm = a.delay; }
       else if (a.t === 'blink') { const an = S.R() * TAU; b.bx = p.x + Math.cos(an) * a.dist; b.by = p.y + Math.sin(an) * a.dist; if (A) { const k = hyp(b.bx - A.x, b.by - A.y); if (k > A.r - 40) { b.bx = A.x + (b.bx - A.x) / k * (A.r - 40); b.by = A.y + (b.by - A.y) / k * (A.r - 40); } } b.st = 'blink'; b.tm = 0.75; }
+      else if (a.t === 'ambush') {
+        // 등 뒤(움직이는 방향의 반대)가 진짜, 나머지는 가짜 예고
+        const mvA = hyp(p.vx, p.vy) > 10 ? Math.atan2(p.vy, p.vx) : toP, nf = Math.round(a.fake * (mul.n || 1));
+        b.spots = [[p.x - Math.cos(mvA) * 70, p.y - Math.sin(mvA) * 70]];
+        for (let i = 0; i < nf; i++) { const an = mvA + (i + 1) / (nf + 1) * TAU; b.spots.push([p.x - Math.cos(an) * 90, p.y - Math.sin(an) * 90]); }
+        b.st = 'ambush'; b.tm = 0.8; b.vanish = true;
+      }
+      else if (a.t === 'breath') { b.st = 'aim'; b.tm = 0.75; b.ang = toP; b.wv = 0; }
+      else if (a.t === 'slam') { b.st = 'slam'; b.tm = a.delay; b.ang = toP; }
+      else if (a.t === 'sweep') { b.st = 'sweep'; b.tm = a.dur; b.sw = S.R() * TAU; b.swT = 0; b.swDir = S.R() < 0.5 ? 1 : -1; }
       else { fire(S, b, a); after(a); b.tm = cd; }
     }
+  } else if (b.st === 'aim' && b.cur.t === 'breath') {
+    b.ang += Math.max(-1.5 * dt, Math.min(1.5 * dt, Math.atan2(Math.sin(toP - b.ang), Math.cos(toP - b.ang))));
+    S.tele.push({ k: 'cone', x: b.x, y: b.y, a: b.ang, len: 260, ang: b.cur.ang, w: 150 });
+    if (b.tm <= 0) { b.st = 'breath'; b.tm = 0; }
+  } else if (b.st === 'breath') {
+    // 부채꼴 불길: 짧은 간격으로 여러 번 내뿜음
+    if (b.tm <= 0) { const a = b.cur, n = Math.round(a.n * (mul.n || 1)); for (let i = 0; i < n; i++) shoot(S, b.x, b.y, b.ang + (i / (n - 1) - 0.5) * a.ang + (S.R() - 0.5) * 0.08, a.spd * (0.9 + S.R() * 0.2), a.dmg, { k: a.k, life: 1.6 }); b.cast = 0.3; b.ca = b.ang; S.ev.push({ k: 'sfx', s: 'bossatk' }); b.tm = 0.16; if (++b.wv >= a.waves) { b.st = 'idle'; b.tm = a.cd * (mul.cd || 1); after(a); } }
   } else if (b.st === 'aim') {
     if (B.move !== 'snake') b.ang = toP; else b.ang = toP;
     S.tele.push({ k: 'line', x: b.x, y: b.y, a: b.ang, len: b.cur.t === 'charge' ? 320 : b.cur.spd * b.cur.dur + 40, w: b.r * 2 });
@@ -745,9 +794,25 @@ function bossAI(S, b, dt) {
   else if (b.st === 'stomp') {
     S.tele.push({ k: 'circle', x: b.x, y: b.y, r: b.cur.r, p: 1 - b.tm / b.cur.delay });
     if (b.tm <= 0) { if (d < b.cur.r + p.r) hurtPlayer(S, b.cur.dmg * S.mod.dmg, 'stomp'); S.fx.push({ k: 'ring', x: b.x, y: b.y, r: b.cur.r, t: 0.35, c: '#c9b38a' }); after(b.cur); b.st = 'idle'; b.tm = b.cur.cd * (mul.cd || 1); }
+  } else if (b.st === 'ambush') {
+    for (const [x, y] of b.spots) S.tele.push({ k: 'circle', x, y, r: b.cur.r, p: 1 - b.tm / 0.8 });
+    if (b.tm <= 0) { const [x, y] = b.spots[0]; b.x = x; b.y = y; b.vanish = false; b.st = 'stomp'; b.cur = { r: b.cur.r, delay: 0.3, dmg: b.cur.dmg, cd: b.cur.cd }; b.tm = 0.3; }
+  } else if (b.st === 'slam') {
+    S.tele.push({ k: 'line', x: b.x, y: b.y, a: b.ang, len: b.cur.len, w: b.cur.w, p: 1 - b.tm / b.cur.delay });
+    if (b.tm <= 0) {
+      const ux = Math.cos(b.ang), uy = Math.sin(b.ang), rx = p.x - b.x, ry = p.y - b.y, al = rx * ux + ry * uy, sd = Math.abs(-rx * uy + ry * ux);
+      if (al > -20 && al < b.cur.len && sd < b.cur.w / 2 + p.r) hurtPlayer(S, b.cur.dmg * S.mod.dmg, 'stomp');
+      for (let d0 = 30; d0 < b.cur.len; d0 += 40) S.fx.push({ k: 'ring', x: b.x + ux * d0, y: b.y + uy * d0, r: b.cur.w * 0.6, t: 0.3, c: '#c9b38a' });
+      S.ev.push({ k: 'sfx', s: 'bossatk' }); after(b.cur); b.st = 'idle'; b.tm = b.cur.cd * (mul.cd || 1);
+    }
+  } else if (b.st === 'sweep') {
+    // 꼬리 휘두르기: 회전하는 탄 줄기
+    b.swT -= dt; b.sw += dt * 1.7 * b.swDir;
+    if (b.swT <= 0) { b.swT = b.cur.rate; const arms = Math.round(b.cur.arms * (mul.n || 1)); for (let i = 0; i < arms; i++) shoot(S, b.x, b.y, b.sw + i / arms * TAU, b.cur.spd, b.cur.dmg, { k: b.cur.k, life: 3 }); }
+    if (b.tm <= 0) { b.st = 'idle'; b.tm = b.cur.cd * (mul.cd || 1); after(b.cur); }
   } else if (b.st === 'blink') {
     S.tele.push({ k: 'circle', x: b.bx, y: b.by, r: 40, p: 1 - b.tm / 0.75 });
-    if (b.tm <= 0) { b.x = b.bx; b.y = b.by; fire(S, b, { t: 'ring', n: b.cur.n, spd: b.cur.spd, dmg: b.cur.dmg }); after(b.cur); b.st = 'idle'; b.tm = b.cur.cd * (mul.cd || 1); }
+    if (b.tm <= 0) { b.x = b.bx; b.y = b.by; fire(S, b, { t: 'ring', n: b.cur.n, spd: b.cur.spd, dmg: b.cur.dmg, k: b.cur.k }); after(b.cur); b.st = 'idle'; b.tm = b.cur.cd * (mul.cd || 1); }
   }
   // 몸통 따라오기
   if (b.segs) {
@@ -838,7 +903,7 @@ function overtime(S) {
   S.ev.push({ k: 'ot' }); S.ev.push({ k: 'warn', txt: '포위당했다!' });
 }
 function retire(S) { S.otAsk = false; S.over = 'clear'; }
-const Core = { relicPick, overtime, retire, newRun, step, choices, pick, paused, revive, result, recalc, rng, wst, setInfo, optCount };
+const Core = { _spawnBoss: spawnBoss, relicPick, overtime, retire, newRun, step, choices, pick, paused, revive, result, recalc, rng, wst, setInfo, optCount };
 G.CORE = Core;
 if (typeof module !== 'undefined') module.exports = Core;
 })(typeof window !== 'undefined' ? window : globalThis);

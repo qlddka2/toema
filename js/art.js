@@ -320,7 +320,8 @@ const SPR = { jungyeong: [daesung, 26], jacheongbi: [uchi, 26], dudu: [daesung, 
   m_jackal: [dog, 22], m_rat: [dog, 22], m_rabbit: [dog, 22], m_fox: [wolf, 22], m_weasel: [wolf, 22], m_tanuki: [wolf, 22], m_otter: [wolf, 22], m_deer: [wolf, 22], m_wildcat: [wolf, 22], m_lcat: [wolf, 22], m_toad: [wolf, 22], m_hedgehog: [dog, 22],
   m_crow2: [crow, 22], m_bat2: [bat, 22], m_boar2: [boar, 26], m_goat: [boar, 26], m_cobra: [snake, 22], m_centi: [snake, 22], m_spider: [snake, 22], m_bear2: [bear, 34],
   dog: [dog, 22], wolf: [wolf, 22], boar: [boar, 26], crow: [crow, 22], bat: [bat, 22], snake: [snake, 22], bear: [bear, 34], buffalo: [buffalo, 34],
-  tiger: [tiger, 44], fox: [fox, 46], bulga: [bulga, 52], imugi: [imugiHead, 34], haetae: [haetae, 46], baekho: [baekho, 44], hwaseo: [hwaseo, 40], jujak: [jujak, 50], hyeonmu: [hyeonmu, 50], cheongryong: [cheongryong, 36] };
+  tiger: [tiger, 44], fox: [fox, 46], bulga: [bulga, 52], imugi: [imugiHead, 34], haetae: [haetae, 46], baekho: [baekho, 44], hwaseo: [hwaseo, 40], jujak: [jujak, 50], hyeonmu: [hyeonmu, 50], cheongryong: [cheongryong, 36],
+  geuseundae: [fox, 46], eoduksini: [bulga, 52], eoduksini_s: [bulga, 52], jangsanbeom: [baekho, 44], songaksi: [fox, 46], gangcheori: [jujak, 50], dueoksini: [bulga, 52], samdugumi: [fox, 46], yeomra: [haetae, 46] };
 /* 색 덧칠 */
 const TINT = { frost: 'rgba(70,120,210,.38)', fire: 'rgba(255,110,40,.38)', sea: 'rgba(40,170,160,.40)', baekho: 'rgba(240,246,255,.72)', cheongryong: 'rgba(60,120,230,.55)' };
 
@@ -328,7 +329,8 @@ const TINT = { frost: 'rgba(70,120,210,.38)', fire: 'rgba(255,110,40,.38)', sea:
 const IMG_LIST = { daesung: 52, uchi: 52, bari: 50, gildong: 52, gangrim: 52, seolmun: 56, jungyeong: 60, jacheongbi: 54, dudu: 56, musun: 56, seolhwa: 54, yeonho: 54, haemosu: 56, cheonha: 62,
   dog: 40, crow: 38, boar: 46, bear: 68, wolf: 42, bat: 38, snake: 38, buffalo: 70,
   m_jackal: 42, m_boar2: 46, m_crow2: 40, m_bat2: 42, m_rat: 36, m_fox: 42, m_tanuki: 42, m_cobra: 40, m_deer: 46, m_wildcat: 42, m_bear2: 68, m_weasel: 38, m_rabbit: 36, m_toad: 38, m_hedgehog: 38, m_lcat: 42, m_goat: 46, m_centi: 40, m_spider: 40, m_otter: 40,
-  tiger: 104, fox: 108, bulga: 116, imugi: 88, haetae: 104, baekho: 108, hwaseo: 92, jujak: 116, hyeonmu: 112, cheongryong: 96 };
+  tiger: 104, fox: 108, bulga: 116, imugi: 88, haetae: 104, baekho: 108, hwaseo: 92, jujak: 116, hyeonmu: 112, cheongryong: 96,
+  geuseundae: 108, eoduksini: 110, eoduksini_s: 78, jangsanbeom: 108, songaksi: 100, gangcheori: 118, dueoksini: 116, samdugumi: 118, yeomra: 112 };
 const ICON_IMG = ['staff', 'talisman', 'thunder', 'beads', 'aura', 'fan', 'bell', 'knives', 'soulfire', 'quake', 'might', 'haste', 'vigor', 'swift', 'magnet', 'regen', 'armor', 'luck',
   'hwando', 'club', 'foxbead', 'sinjang', 'jeung', 'chain', 'frost', 'hwacha', 'bomb', 'feather', 'water', 'shield', 'clone', 'focus', 'dur', 'guard', 'essence', 'fortune',
   'u_thunder', 'u_soul', 'u_hwacha', 'u_sword', 'u_bell', 'u_quake', ...['thunder', 'coin', 'herb', 'mirror', 'bell', 'scale', 'shoes', 'hat', 'sword', 'horn', 'pouch', 'bronze', 'ledger', 'ginseng', 'thread', 'jangseung'].map(k => 'r_' + k)];   // 값 = 게임 안에서 그릴 상자 크기

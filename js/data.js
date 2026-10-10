@@ -1,7 +1,7 @@
 /* 퇴마 서바이벌 — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
 (function (G) {
 const D = {};
-D.VERSION = '3.4.0';
+D.VERSION = '3.6.0';
 
 /* ───── 주인공 ─────
    unlock: 해금 조건 (없으면 처음부터) */
@@ -37,9 +37,9 @@ D.HEROES = {
 };
 
 /* ───── 주인공 성장 (금화로 레벨업) ─────
-   레벨마다 피해 +2%, 최대 체력 +3%. 5레벨·10레벨에 주인공 고유 특성이 열림.
+   레벨마다 피해 +3%, 최대 체력 +4%. 5레벨·10레벨에 주인공 고유 특성이 열림.
    특성 mod: might 피해, area 범위, cd 공격 간격 감소, hp 최대 체력, armor 방어, regen 초당 회복, xp 경험치, gold 금화, crit 치명타, spd 이동 속도, startLv 시작 무기 레벨 */
-D.HERO_LV = { max: 10, might: 0.02, hp: 0.03, cost: [200, 350, 550, 800, 1100, 1500, 2000, 2600, 3300] };
+D.HERO_LV = { max: 10, might: 0.03, hp: 0.04, cost: [200, 350, 550, 800, 1100, 1500, 2000, 2600, 3300] };
 D.TALENT = {
   daesung: [{ lv: 5, name: '여의신통', desc: '공격 범위 +15%', mod: { area: 0.15 } }, { lv: 10, name: '제천대성', desc: '피해 +15%, 방어 +1', mod: { might: 0.15, armor: 1 } }],
   uchi:    [{ lv: 5, name: '속필', desc: '공격 속도 +8%', mod: { cd: 0.08 } }, { lv: 10, name: '도통', desc: '시작 무기 2레벨, 치명타 확률 +8%', mod: { startLv: 1, crit: 0.08 } }],
@@ -454,6 +454,31 @@ D.BOSSES = {
   cheongryong: { name: '청룡', sub: '마침내 승천한 용', spr: 'cheongryong', hp: 50000, spd: 92, dmg: 20, r: 30, move: 'snake', segs: 20, segSpr: 'segb', gold: 500,
     atk: [{ t: 'rain', n: 7, r: 44, delay: 0.9, dmg: 30, k: 'bolt', cd: 2.2 }, { t: 'spread', n: 7, ang: 1.0, spd: 180, dmg: 14, k: 'bolt2', cd: 2.2 }, { t: 'charge', aim: 0.6, spd: 300, dur: 1.2, cd: 2.0 }, { t: 'ring', n: 18, spd: 140, dmg: 14, k: 'bolt2', cd: 2.4 }],
     rage: { mul: { n: 1.35, cd: 0.8 } } },
+  /* ── 백귀야행 전용 (v3.6) ── 중간 우두머리 4 + 최종 우두머리 4 */
+  geuseundae: { name: '그슨대', sub: '어둠 속에서 자라나는 그림자', spr: 'geuseundae', hp: 5200, spd: 58, dmg: 18, r: 32, move: 'keep', gold: 80, night: true,
+    atk: [{ t: 'rain', n: 5, r: 54, delay: 1.2, dmg: 24, k: 'shadow', pool: { life: 3.5, dmg: 7 }, cd: 2.2 }, { t: 'blink', dist: 150, n: 10, spd: 125, dmg: 13, k: 'shadow', cd: 2.4 }],
+    rage: { mul: { n: 1.4, cd: 0.8 } } },
+  eoduksini: { name: '어둑시니', sub: '쳐다볼수록 커지는 어둠', spr: 'eoduksini', hp: 7000, spd: 52, dmg: 20, r: 34, move: 'chase', gold: 100, night: true,
+    atk: [{ t: 'ring', n: 12, spd: 115, dmg: 14, k: 'shadow', cd: 2.4 }, { t: 'homing', n: 2, spd: 90, turn: 1.4, dmg: 15, cd: 2.4 }],
+    rage: { split: 2, mul: { cd: 0.85 } } },
+  jangsanbeom: { name: '장산범', sub: '사람 목소리를 흉내 내는 흰 짐승', spr: 'jangsanbeom', hp: 8400, spd: 84, dmg: 20, r: 32, move: 'chase', gold: 120, night: true,
+    atk: [{ t: 'ambush', r: 84, dmg: 30, fake: 1, cd: 1.8 }, { t: 'dash', aim: 0.7, spd: 460, dur: 0.5, rest: 0.6, cd: 1.8 }],
+    rage: { mul: { cd: 0.8 }, atk: [{ t: 'ambush', r: 90, dmg: 30, fake: 2, cd: 1.2 }, { t: 'ambush', r: 90, dmg: 30, fake: 2, cd: 1.6 }, { t: 'dash', aim: 0.6, spd: 480, dur: 0.5, rest: 0.5, cd: 1.6 }] } },
+  songaksi: { name: '손각시', sub: '시집 못 간 처녀의 한', spr: 'songaksi', hp: 13000, spd: 56, dmg: 18, r: 28, move: 'keep', gold: 160, night: true,
+    atk: [{ t: 'wall', w: 560, gap: 110, spd: 95, dmg: 13, k: 'ghost', cd: 2.8 }, { t: 'homing', n: 2, spd: 90, turn: 1.5, dmg: 13, cd: 2.4 }, { t: 'ring', n: 12, spd: 115, dmg: 12, k: 'ghost', cd: 2.4 }],
+    rage: { mul: { n: 1.35, cd: 0.8 } } },
+  gangcheori: { name: '강철이', sub: '지나간 자리마다 가뭄이 드는 불의 용마', spr: 'gangcheori', hp: 38000, spd: 74, dmg: 22, r: 34, move: 'chase', gold: 360, night: true, trail: { r: 22, life: 2.4, dmg: 6 },
+    atk: [{ t: 'breath', ang: 1.0, n: 9, waves: 4, spd: 230, dmg: 13, k: 'fire2', cd: 2.2 }, { t: 'dash', aim: 0.7, spd: 440, dur: 0.6, rest: 0.6, cd: 1.8, after: { t: 'ring', n: 10, spd: 125, dmg: 12, k: 'fire2' } }],
+    rage: { mul: { n: 1.25, cd: 0.85 }, trail: { r: 28, life: 3.2, dmg: 8 } } },
+  dueoksini: { name: '두억시니', sub: '머리를 짓누르는 사나운 귀신', spr: 'dueoksini', hp: 60000, spd: 58, dmg: 26, r: 38, move: 'chase', gold: 380, night: true,
+    atk: [{ t: 'slam', len: 360, w: 70, delay: 0.9, dmg: 34, cd: 1.6, after: { t: 'spread', n: 7, ang: 0.9, spd: 180, dmg: 13, k: 'spike' } }, { t: 'stomp', r: 150, delay: 1.0, dmg: 32, cd: 2.0, after: { t: 'ring', n: 16, spd: 130, dmg: 13, k: 'spike' } }, { t: 'summon', type: 'hdog', n: 12, cd: 2.0 }],
+    rage: { mul: { n: 1.3, cd: 0.8 }, extra: { t: 'ring', n: 10, spd: 120, dmg: 11, k: 'spike' } } },
+  samdugumi: { name: '삼두구미', sub: '머리 셋, 꼬리 아홉의 땅속 괴물', spr: 'samdugumi', hp: 50000, spd: 78, dmg: 22, r: 36, move: 'chase', gold: 400, night: true,
+    atk: [{ t: 'tri', n: 4, ang: 0.45, spd: 175, dmg: 14, k: 'shadow', waves: 3, cd: 1.6 }, { t: 'sweep', arms: 3, dur: 2.0, rate: 0.09, spd: 150, dmg: 12, k: 'shadow', cd: 2.0 }, { t: 'dash', aim: 0.6, spd: 460, dur: 0.5, rest: 0.6, cd: 1.8 }],
+    rage: { mul: { n: 1.3, cd: 0.8 } } },
+  yeomra: { name: '염라대왕', sub: '저승의 심판관', spr: 'yeomra', hp: 64000, spd: 60, dmg: 24, r: 34, move: 'keep', gold: 450, night: true,
+    atk: [{ t: 'judge', r: 100, delay: 1.05, gap: 0.9, dmg: 32, k: 'ghost', cd: 2.6 }, { t: 'summon', type: 'dbat', n: 10, cd: 2.0 }, { t: 'ring', n: 18, spd: 130, dmg: 14, k: 'ghost', cd: 2.2 }],
+    rage: { mul: { n: 1.3, cd: 0.8 }, extra: { t: 'homing', n: 2, spd: 95, turn: 1.6, dmg: 14 } } },
 };
 
 /* ───── 챕터 ─────
@@ -489,8 +514,13 @@ D.ENDLESS = (() => {
     for (const w of c.waves) if (w[0] < 600) waves.push([i * L + w[0] * L / 600, w[1], w[2]]);
     for (const e of c.events) events.push([i * L + (e[1] === 'boss' ? (e[0] >= 600 ? L : L / 2) : e[0] * L / 600), ...e.slice(1)]);
   });
+  // 2~5구간의 중간 우두머리는 백귀야행 전용 요괴로 교체
+  const MID = ['geuseundae', 'eoduksini', 'jangsanbeom', 'songaksi'];
+  for (const e of events) if (e[1] === 'boss' && e[0] % L) { const i = Math.floor(e[0] / L); if (i >= 1) e[2] = MID[i - 1]; }
   events.sort((a, b) => a[0] - b[0]);
-  return { id: 6, endless: true, name: '백귀야행', sub: '온갖 요괴가 밤길을 행진한다', theme: 'night', hpMul: 1.15, dmgMul: 1.05, clearGold: 0, firstGold: 0, waves, events };
+  // 30분 이후 2분마다: 백귀야행 전용 최종 우두머리 4종과 빠졌던 중간 우두머리가 번갈아 등장
+  const otBosses = ['gangcheori', 'bulga', 'dueoksini', 'haetae', 'samdugumi', 'hwaseo', 'yeomra', 'hyeonmu'];
+  return { id: 6, endless: true, name: '백귀야행', sub: '온갖 요괴가 밤길을 행진한다', theme: 'night', hpMul: 1.15, dmgMul: 1.05, clearGold: 0, firstGold: 0, waves, events, otBosses };
 })();
 D.escore = (t, kills, bosses) => 10 * t + kills + 2000 * bosses;
 /* 랭킹 번호: 보통 백귀야행 1000+주, 어려움 백귀야행 5000+주 / 해금: 보통·어려움 3장 클리어 */
@@ -516,7 +546,24 @@ D.WEEKLY = [
 D.WEEK_V3 = 2962;
 D.weekly = (w = D.weekNo()) => w <= D.WEEK_V3 ? D.WEEKLY[((w % 8) + 8) % 8] : D.WEEKLY[(w - D.WEEK_V3 + 7) % D.WEEKLY.length];
 
-D.HARD = { hpMul: 1.8, dmgMul: 1.45, spawnMul: 1.15, goldMul: 1.6, firstGold: 2 };
+D.HARD = { spawnMul: 1.15, goldMul: 1.6, firstGold: 2 };
+/* ───── 난이도 단계 (v3.5) ─────
+   일반 n장 = n단계, 어려움 n장 = n+2단계 (어려움 1장 = 일반 3장 세기 … 어려움 3장 = 일반 5장, 4·5장은 그 위)
+   hp·dmg: 잡몹·우두머리 체력/피해 배율, boss: 우두머리 체력 추가 배율 (3장부터 '화력 체크' 벽)
+   REC: 단계별 권장 투자 — 영구 강화에 쓴 금화(b)와 주인공 레벨(l). 권장 전투력은 이걸로 계산 */
+D.TIER = { hp: [1.15, 1.4, 1.65, 1.9, 2.2, 2.6, 3.0], dmg: [1.05, 1.12, 1.2, 1.28, 1.36, 1.46, 1.56], boss: [1, 1.05, 1.3, 1.65, 1.85, 2.3, 2.7] };
+D.tierOf = (ch, hard) => Math.min(D.TIER.hp.length - 1, ch - 1 + (hard ? 2 : 0));
+D.REC = [{ b: 0, l: 1 }, { b: 600, l: 1 }, { b: 4000, l: 3 }, { b: 8000, l: 5 }, { b: 14000, l: 6 }, { b: 20000, l: 8 }, { b: 28000, l: 10 }];
+/* 금화 b로 영구 강화를 고루 산다면 (권장 전투력·봇 측정용) */
+D.metaPlan = b => {
+  const m = {}, order = ['atk', 'hp', 'arm', 'luck', 'xp', 'greed', 'spd', 'mag']; let bought = true;
+  while (bought) { bought = false; for (const k of order) { const M = D.META[k], lv = m[k] || 0; if (lv < M.max && M.cost[lv] <= b) { b -= M.cost[lv]; m[k] = lv + 1; bought = true; } } }
+  return m;
+};
+/* 전투력: 영구 강화 + 주인공 레벨로 매긴 숫자 하나 (피해 × √체력 × 방어·치명·경험치·이동) */
+D.power = (m, hl = 1) => { const L = hl - 1, a = 1 + (m.atk || 0) * D.META.atk.per + L * D.HERO_LV.might, h = 1 + (m.hp || 0) * D.META.hp.per + L * D.HERO_LV.hp;
+  return Math.round(1000 * a * Math.sqrt(h) * (1 + 0.06 * (m.arm || 0)) * (1 + (m.luck || 0) * D.META.luck.per) * (1 + 0.01 * (m.xp || 0)) * (1 + 0.01 * (m.spd || 0))); };
+D.recPower = (ch, hard) => { const r = D.REC[D.tierOf(ch, hard)]; return D.power(D.metaPlan(r.b), r.l); };
 D.BOSS_TIME = 600;
 D.ENEMY_CAP = 320;
 
@@ -527,8 +574,8 @@ D.xpNeed = L => Math.round(5 + (L - 1) * 7 + Math.max(0, L - 15) * 6);
 
 /* ───── 영구 강화(금화) ───── */
 D.META = {
-  atk:   { name: '기력', desc: '피해 +4%',           max: 10, per: 0.04, cost: [60, 120, 200, 300, 450, 700, 1000, 1400, 1900, 2500] },
-  hp:    { name: '체질', desc: '최대 체력 +6%',      max: 10, per: 0.06, cost: [60, 120, 200, 300, 450, 700, 1000, 1400, 1900, 2500] },
+  atk:   { name: '기력', desc: '피해 +6%',           max: 10, per: 0.06, cost: [60, 120, 200, 300, 450, 700, 1000, 1400, 1900, 2500] },
+  hp:    { name: '체질', desc: '최대 체력 +8%',      max: 10, per: 0.08, cost: [60, 120, 200, 300, 450, 700, 1000, 1400, 1900, 2500] },
   arm:   { name: '금강', desc: '방어 +1',       max: 5,  per: 1,    cost: [250, 600, 1200, 2200, 3500] },
   spd:   { name: '신법', desc: '이동 속도 +3%',      max: 8,  per: 0.03, cost: [50, 100, 160, 240, 350, 550, 800, 1100] },
   mag:   { name: '흡인', desc: '구슬 흡수 범위 +10%', max: 8,  per: 0.10, cost: [40, 80, 130, 200, 300, 450, 650, 900] },

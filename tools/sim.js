@@ -2,6 +2,8 @@
 const D = require('../js/data.js');
 global.DATA = D;
 const C = require('../js/core.js');
+// 보스 바꿔 끼우기 시험: BMID=그슨대id BFIN=강철이id 이면 해당 챕터의 중간/최종 우두머리를 교체
+for (const c of D.CHAPTERS) for (const e of c.events) if (e[1] === 'boss') { if (e[0] < 600 && process.env.BMID) e[2] = process.env.BMID; if (e[0] >= 600 && process.env.BFIN) e[2] = process.env.BFIN; }
 const hyp = Math.hypot;
 
 function bot(S) {
@@ -53,6 +55,7 @@ const HARD = process.env.HARD === '1';
 const OT = process.env.OT === '1';   // 클리어 후 연장전까지 계속
 const SETS = process.env.SETS !== '0';   // 봇이 세트를 맞추려 하는지
 const meta = {}; for (const k in D.META) if (k !== 'roll' && k !== 'rev') meta[k] = Math.min(ML, D.META[k].max);
+if (process.env.BUDGET) { for (const k in meta) delete meta[k]; Object.assign(meta, D.metaPlan(+process.env.BUDGET)); }   // 금화 예산만큼 고루 강화
 const HEROES = process.env.HEROES ? process.env.HEROES.split(',') : Object.keys(D.HEROES);
 for (const hero of HEROES) {
   const rs = []; const t0 = Date.now();
