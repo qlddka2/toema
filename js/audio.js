@@ -1,4 +1,4 @@
-/* 퇴마 서바이버 — 소리. 파일 없이 브라우저에서 직접 합성합니다.
+/* 퇴마 서바이벌 — 소리. 파일 없이 브라우저에서 직접 합성합니다.
    효과음 + 국악풍 배경음(가야금 뜯는 소리·북·대금 비슷한 음색, 5음계) */
 (function () {
 let ac = null, master = null, sfxBus = null, bgmBus = null, synthBus = null, noiseBuf = null;
@@ -64,32 +64,56 @@ const buk = (t, v = 0.5, bus) => { osc(110, t, 0.35, { type: 'sine', vol: v, sli
 const janggu = (t, v = 0.18, bus) => { noise(t, 0.07, { vol: v, lp: 5000, hp: 1500, bus }); osc(380, t, 0.06, { type: 'triangle', vol: v * 0.5, slide: -120, bus }); };
 const bass = (f, t, d, v = 0.16, bus) => osc(f, t, d, { type: 'sine', vol: v, attack: 0.01, bus });
 
-/* ───── 효과음 ───── */
+/* ───── 효과음 ─────
+   r: 재생할 때마다 0.92~1.08 사이로 음높이를 살짝 흔들어 같은 소리가 반복돼도 덜 질리게 */
+const band = (t, d, { f0 = 800, f1 = 2400, q = 1.2, vol = 0.12, bus } = {}) => {   // 휘두르는 바람 소리: 대역 필터가 쓸고 지나감
+  const a = ac, s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+  s.buffer = noiseBuf; f.type = 'bandpass'; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + d);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + d * 0.3); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  s.connect(f).connect(g).connect(bus || sfxBus); s.start(t); s.stop(t + d + 0.02);
+};
+const metal = (f, t, d, v) => [1, 2.76, 5.4, 8.93].forEach((m, i) => osc(f * m, t, d / (1 + i * 0.6), { type: 'sine', vol: v / (1 + i), attack: 0.001 }));
+let xpCombo = 0, xpAt = 0;
 const P = {
-  swing: t => { noise(t, 0.12, { vol: 0.18, lp: 2500, hp: 400 }); osc(260, t, 0.1, { type: 'triangle', vol: 0.06, slide: -150 }); },
-  throw: t => { noise(t, 0.06, { vol: 0.08, lp: 6000, hp: 2000 }); osc(1100, t, 0.05, { type: 'triangle', vol: 0.03, slide: 400 }); },
-  thunder: t => { noise(t, 0.4, { vol: 0.3, lp: 1400 }); osc(90, t, 0.3, { type: 'sawtooth', vol: 0.08, slide: -50, lp: 600 }); },
-  wind: t => noise(t, 0.3, { vol: 0.12, lp: 1800, hp: 500 }),
-  bell: t => { osc(1320, t, 0.5, { type: 'sine', vol: 0.07 }); osc(1980, t, 0.35, { type: 'sine', vol: 0.04 }); osc(2640, t, 0.2, { type: 'sine', vol: 0.02 }); },
-  soul: t => osc(600, t, 0.18, { type: 'sine', vol: 0.06, slide: 500 }),
-  quake: t => { osc(65, t, 0.4, { type: 'sine', vol: 0.3, slide: -25 }); noise(t, 0.25, { vol: 0.15, lp: 400 }); },
-  bossatk: t => osc(200, t, 0.12, { type: 'square', vol: 0.03, slide: -80, lp: 1200 }),
-  coin: t => { osc(1568, t, 0.07, { type: 'square', vol: 0.03, lp: 4000 }); osc(2093, t + 0.05, 0.1, { type: 'square', vol: 0.03, lp: 4000 }); },
-  heal: t => { osc(523, t, 0.15, { type: 'sine', vol: 0.08 }); osc(784, t + 0.08, 0.2, { type: 'sine', vol: 0.08 }); },
-  magnet: t => osc(400, t, 0.4, { type: 'sine', vol: 0.08, slide: 800 }),
-  level: t => [523, 659, 784].forEach((f, i) => pluck(f, t + i * 0.07, 0.14)),
-  hurt: t => { osc(150, t, 0.12, { type: 'sawtooth', vol: 0.08, slide: -60, lp: 900 }); noise(t, 0.06, { vol: 0.08, lp: 1500 }); },
-  boss: t => { buk(t, 0.7); buk(t + 0.35, 0.7); buk(t + 0.7, 0.9); osc(98, t, 1.2, { type: 'sawtooth', vol: 0.05, lp: 500 }); },
-  chest: t => [784, 988, 1175, 1568].forEach((f, i) => pluck(f, t + i * 0.06, 0.12)),
-  evo: t => { [523, 659, 784, 1047, 1319].forEach((f, i) => pluck(f, t + i * 0.08, 0.15)); osc(1047, t + 0.4, 0.8, { type: 'sine', vol: 0.06 }); },
+  swing: (t, r) => { band(t, 0.16, { f0: 700 * r, f1: 3200 * r, vol: 0.2 }); osc(220 * r, t, 0.09, { type: 'triangle', vol: 0.05, slide: -120 }); },
+  throw: (t, r) => { band(t, 0.08, { f0: 2500 * r, f1: 6000, q: 2, vol: 0.09 }); osc(1300 * r, t, 0.04, { type: 'triangle', vol: 0.025, slide: 500 }); },
+  thunder: (t, r) => { noise(t, 0.05, { vol: 0.35, lp: 9000, hp: 2500 }); noise(t + 0.02, 0.5, { vol: 0.32, lp: 1200 }); osc(70 * r, t, 0.45, { type: 'sawtooth', vol: 0.09, slide: -35, lp: 500 }); },
+  wind: (t, r) => band(t, 0.35, { f0: 400 * r, f1: 1600 * r, q: 0.8, vol: 0.14 }),
+  bell: (t, r) => { metal(1250 * r, t, 0.7, 0.06); },
+  soul: (t, r) => { osc(520 * r, t, 0.2, { type: 'sine', vol: 0.05, slide: 600, vib: 0.03 }); osc(780 * r, t + 0.03, 0.16, { type: 'sine', vol: 0.025, slide: 500 }); },
+  quake: (t, r) => { osc(58 * r, t, 0.5, { type: 'sine', vol: 0.34, slide: -22 }); noise(t, 0.3, { vol: 0.18, lp: 380 }); noise(t + 0.05, 0.25, { vol: 0.06, lp: 2500, hp: 900 }); },
+  bossatk: (t, r) => { osc(190 * r, t, 0.14, { type: 'square', vol: 0.03, slide: -90, lp: 1100 }); noise(t, 0.08, { vol: 0.04, lp: 1800 }); },
+  // 맞히기·처치·경험치: 손맛을 내는 작은 소리들 (자주 나므로 아주 작게)
+  hit: (t, r) => { noise(t, 0.035, { vol: 0.07, lp: 2600 * r, hp: 300 }); osc(150 * r, t, 0.05, { type: 'sine', vol: 0.06, slide: -60, attack: 0.001 }); },
+  kill: (t, r) => { osc(420 * r, t, 0.07, { type: 'triangle', vol: 0.035, slide: -220 }); noise(t, 0.05, { vol: 0.04, lp: 3500, hp: 800 }); },
+  xp: (t, r) => { const n = performance.now(); xpCombo = n - xpAt < 400 ? Math.min(xpCombo + 1, 12) : 0; xpAt = n; const f = 880 * Math.pow(2, [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28][xpCombo] / 12); osc(f, t, 0.06, { type: 'sine', vol: 0.03, attack: 0.002 }); },
+  coin: t => { osc(1568, t, 0.07, { type: 'square', vol: 0.025, lp: 4000 }); osc(2093, t + 0.05, 0.12, { type: 'square', vol: 0.025, lp: 4000 }); },
+  heal: t => { [523, 659, 784].forEach((f, i) => osc(f, t + i * 0.06, 0.22, { type: 'sine', vol: 0.07, vib: 0.01 })); },
+  magnet: t => { osc(300, t, 0.5, { type: 'sine', vol: 0.07, slide: 900 }); band(t, 0.5, { f0: 500, f1: 4000, vol: 0.06 }); },
+  level: t => { [523, 659, 784, 1047].forEach((f, i) => pluck(f, t + i * 0.06, 0.13)); osc(1568, t + 0.24, 0.35, { type: 'sine', vol: 0.03 }); },
+  hurt: (t, r) => { osc(140 * r, t, 0.14, { type: 'sawtooth', vol: 0.09, slide: -70, lp: 900 }); noise(t, 0.08, { vol: 0.1, lp: 1400 }); },
+  boss: t => { buk(t, 0.7); buk(t + 0.35, 0.7); buk(t + 0.7, 0.9); osc(98, t, 1.2, { type: 'sawtooth', vol: 0.05, lp: 500 }); metal(196, t + 0.7, 2.2, 0.05); },
+  chest: t => { [784, 988, 1175, 1568].forEach((f, i) => pluck(f, t + i * 0.06, 0.12)); metal(2093, t + 0.25, 0.6, 0.02); },
+  evo: t => { [523, 659, 784, 1047, 1319].forEach((f, i) => pluck(f, t + i * 0.08, 0.15)); osc(1047, t + 0.4, 0.8, { type: 'sine', vol: 0.06 }); metal(523, t + 0.4, 1.6, 0.04); },
   clear: t => { [392, 523, 659, 784, 1047].forEach((f, i) => pluck(f, t + i * 0.12, 0.16)); buk(t, 0.5); buk(t + 0.6, 0.6); },
   dead: t => { [392, 330, 262, 196].forEach((f, i) => pluck(f, t + i * 0.18, 0.13)); osc(130, t, 1, { type: 'sine', vol: 0.1, slide: -60 }); },
-  click: t => osc(880, t, 0.04, { type: 'triangle', vol: 0.05 }),
+  click: t => { osc(880, t, 0.04, { type: 'triangle', vol: 0.045 }); osc(1760, t, 0.02, { type: 'sine', vol: 0.015 }); },
+  // v3.0 무기
+  zap: (t, r) => { const a = ac, o = a.createOscillator(), g = a.createGain(), m = a.createOscillator(), mg = a.createGain(); o.type = 'square'; o.frequency.setValueAtTime(900 * r, t); o.frequency.exponentialRampToValueAtTime(300, t + 0.18); m.frequency.value = 55; mg.gain.value = 0.03; m.connect(mg).connect(g.gain); g.gain.setValueAtTime(0.04, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2); const f = a.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 3500; o.connect(f).connect(g).connect(sfxBus); o.start(t); o.stop(t + 0.22); m.start(t); m.stop(t + 0.22); noise(t, 0.12, { vol: 0.08, lp: 9000, hp: 3000 }); },
+  frost: (t, r) => { [2093, 2637, 3136, 3951].forEach((f, i) => osc(f * r, t + i * 0.03, 0.4, { type: 'sine', vol: 0.025, attack: 0.002 })); noise(t, 0.35, { vol: 0.08, lp: 12000, hp: 5000 }); osc(220 * r, t, 0.3, { type: 'sine', vol: 0.06, slide: -80 }); },
+  rocket: (t, r) => { band(t, 0.25, { f0: 600 * r, f1: 3000, q: 1, vol: 0.12 }); noise(t, 0.2, { vol: 0.05, lp: 1500, hp: 300 }); },
+  boom: (t, r) => { osc(80 * r, t, 0.45, { type: 'sine', vol: 0.3, slide: -45 }); noise(t, 0.4, { vol: 0.24, lp: 1600 * r }); noise(t, 0.08, { vol: 0.12, lp: 8000, hp: 2000 }); },
+  beam: (t, r) => { osc(300 * r, t, 0.35, { type: 'sawtooth', vol: 0.035, slide: 1400, lp: 3000 }); osc(600 * r, t, 0.35, { type: 'sine', vol: 0.04, slide: 2000 }); band(t, 0.3, { f0: 1500, f1: 6000, vol: 0.05 }); },
+  clang: (t, r) => metal(620 * r, t, 0.35, 0.05),
+  bonk: (t, r) => { osc(240 * r, t, 0.09, { type: 'triangle', vol: 0.09, slide: -80, attack: 0.001 }); noise(t, 0.04, { vol: 0.06, lp: 1200 }); },
+  summon: t => { metal(262, t, 1.2, 0.05); [392, 523, 784].forEach((f, i) => pluck(f, t + i * 0.05, 0.08)); },
+  curse: (t, r) => { osc(110 * r, t, 0.5, { type: 'sawtooth', vol: 0.04, lp: 700, vib: 0.03 }); osc(116 * r, t, 0.5, { type: 'sawtooth', vol: 0.04, lp: 700 }); band(t, 0.4, { f0: 300, f1: 900, vol: 0.05 }); },
 };
+const GAP = { coin: 45, hit: 55, kill: 60, xp: 35, clang: 90, bonk: 50, boom: 80, rocket: 120 };
 function play(k) {
   if (!opt.sfx) return; const a = ctx(); if (!a || a.state !== 'running') return;
-  const n = performance.now(); if (last[k] && n - last[k] < (k === 'coin' ? 45 : 70)) return; last[k] = n;
-  try { if (FILES['sfx_' + k]) playBuf(FILES['sfx_' + k], sfxBus); else P[k] && P[k](a.currentTime + 0.01); } catch (e) {}
+  const n = performance.now(); if (last[k] && n - last[k] < (GAP[k] || 70)) return; last[k] = n;
+  try { if (FILES['sfx_' + k]) playBuf(FILES['sfx_' + k], sfxBus); else P[k] && P[k](a.currentTime + 0.01, 0.92 + Math.random() * 0.16); } catch (e) {}
 }
 
 /* ───── 배경음 (국악 퓨전 · 긴장감) ─────

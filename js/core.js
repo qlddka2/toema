@@ -1,4 +1,4 @@
-/* 퇴마 서바이버 — 게임 규칙 코어. 화면(DOM)과 분리되어 있어 자동 시뮬레이션에도 그대로 쓰입니다. */
+/* 퇴마 서바이벌 — 게임 규칙 코어. 화면(DOM)과 분리되어 있어 자동 시뮬레이션에도 그대로 쓰입니다. */
 (function (G) {
 const D = G.DATA || (typeof require !== 'undefined' ? require('./data.js') : null);
 const TAU = Math.PI * 2;
@@ -173,6 +173,7 @@ function pick(S, o) {
   if (S.chests > 0) S.chests--; else if (S.pendingLv > 0) S.pendingLv--;
 }
 const paused = S => S.over || S.pendingLv > 0 || S.chests > 0 || S.otAsk || S.relicAsk;
+const sfx = (S, k, gap) => { const T = S.sfxT || (S.sfxT = {}); if ((T[k] || -1) > S.t) return; T[k] = S.t + (gap || 0.06); S.ev.push({ k: 'sfx', s: k }); };   // 같은 소리가 한 프레임에 몰리지 않게
 const heal = (S, v) => { const p = S.p; p.hp = Math.min(p.maxhp, p.hp + v * (p.healMul || 1)); };
 const addGold = (S, v) => { S.gold += v * S.goldMul; };
 
@@ -242,6 +243,7 @@ function hurtEnemy(S, e, dmg, kx, ky) {
   dmg = Math.round(dmg * S.p.might * (0.9 + S.R() * 0.2) * (crit ? (S.p.critMul || D.CRIT_MUL) : 1));
   e.hp -= dmg; e.flash = 0.12; S.dmgSum = (S.dmgSum || 0) + Math.min(dmg, e.hp + dmg);
   if (kx || ky) { const m = (S.p.kbMul || 1) / Math.max(1, e.mass); e.kx += kx * m; e.ky += ky * m; }
+  sfx(S, 'hit', 0.055);
   if (S.fx.length < 140) S.fx.push({ k: 'num', x: e.x + (S.R() - 0.5) * 10, y: e.y - e.r, v: dmg, t: 0.6, big: e.boss, crit });
   if (crit && S.r7 && !(S.swcd > 0) && S.R() < 0.15) {   // 칠성검: 치명타 → 벼락
     S.swcd = 0.15; S.fx.push({ k: 'bolt', x: e.x, y: e.y, r: 44, t: 0.25, seed: S.R() });
@@ -263,7 +265,7 @@ function kill(S, e) {
     else { S.midDone = true; S.ev.push({ k: 'bossdown', name: e.name }); relicOffer(S); }
     return;
   }
-  S.kills++;
+  S.kills++; sfx(S, 'kill', 0.07);
   const kh = (S.P.blood ? S.P.blood * D.PASSIVES.blood.per : 0) + (S.p.onKill || 0) + (S.khAura || 0); if (kh) heal(S, kh);
   if (e.curse && e.curse.t > 0) curseSpread(S, e);
   if (e.elite) { S.drops.push({ k: 'chest', x: e.x, y: e.y, n: S.wk === 'market' ? 2 : 1 }); S.drops.push({ k: 'bag', x: e.x + 14, y: e.y }); }
@@ -437,13 +439,13 @@ function weapons(S, dt) {
       anim(S, 'cast'); S.ev.push({ k: 'sfx', s: 'soul' });
     } else if (w.id === 'sinjang') {   // 소환
       for (let i = 0; i < s.n; i++) { if (S.mn.length >= 12) S.mn.shift(); const a = i / s.n * TAU + S.R(); S.mn.push({ x: p.x + Math.cos(a) * 30, y: p.y + Math.sin(a) * 30, t: s.dur * p.durMul, t0: s.dur * p.durMul, dmg: s.dmg, r: s.r * A, big: s.big, atk: 0.3, tgt: null, tt: 0, face: 1, sw: 0 }); }
-      S.fx.push({ k: 'ring', x: p.x, y: p.y, r: 50, t: 0.4, c: '#ffd36b' }); anim(S, 'cast'); S.ev.push({ k: 'sfx', s: 'soul' });
+      S.fx.push({ k: 'ring', x: p.x, y: p.y, r: 50, t: 0.4, c: '#ffd36b' }); anim(S, 'cast'); S.ev.push({ k: 'sfx', s: 'summon' });
     } else if (w.id === 'jeung') {   // 저주 표식
       const cand = []; for (const e of S.en) if (!e.dead && !e.seg && !(e.curse && e.curse.t > 0) && hyp(e.x - p.x, e.y - p.y) < 320) cand.push(e);
       if (!cand.length) { w.cd = 0.3; continue; }
       cand.sort((a, b) => b.hp - a.hp);
       for (let i = 0; i < s.n && i < cand.length; i++) { const e = cand[i]; e.curse = { t: s.dur * p.durMul, amp: s.amp, dmg: s.dmg, burst: s.burst, spread: s.spread || 1, tick: 0.5 }; S.cursed.push(e); S.fx.push({ k: 'link', x: p.x, y: p.y, x2: e.x, y2: e.y, t: 0.25 }); }
-      anim(S, 'cast'); S.ev.push({ k: 'sfx', s: 'soul' });
+      anim(S, 'cast'); S.ev.push({ k: 'sfx', s: 'curse' });
     } else if (w.id === 'chain') {   // 연쇄 번개
       const starts = nearestN(S, s.n, 300); if (!starts.length) { w.cd = 0.2; continue; }
       for (const st of starts) {
@@ -454,17 +456,17 @@ function weapons(S, dt) {
         }
         S.fx.push({ k: 'chain', pts, t: 0.25, evo: w.evo });
       }
-      anim(S, 'cast'); S.ev.push({ k: 'sfx', s: 'thunder' });
+      anim(S, 'cast'); S.ev.push({ k: 'sfx', s: 'zap' });
     } else if (w.id === 'frost') {   // 빙결 폭발
       const rr = s.r * A, fz = s.frz * p.frzMul * p.durMul;
       for (const e of near(S, p.x, p.y, rr, TMP)) { hurtEnemy(S, e, s.dmg, 0, 0); if (e.boss || e.seg) { e.slowT = fz; e.slow = 0.5; } else { const f = fz * (1 - (e.sres || 0)); e.stun = Math.max(e.stun || 0, f); e.frz = Math.max(e.frz || 0, f); } }
       if (s.shards) for (let i = 0; i < s.shards; i++) { const a = i / s.shards * TAU + S.R() * 0.3; S.pr.push({ k: 'knife', ice: true, x: p.x, y: p.y, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, dmg: s.dmg * 0.5, pierce: 3, life: 0.7, r: 7, hit: new Set(), a, evo: true }); }
-      S.fx.push({ k: 'nova', x: p.x, y: p.y, r: rr, t: 0.45, evo: w.evo }); anim(S, 'cast'); S.ev.push({ k: 'sfx', s: 'bell' });
+      S.fx.push({ k: 'nova', x: p.x, y: p.y, r: rr, t: 0.45, evo: w.evo }); anim(S, 'cast'); S.ev.push({ k: 'sfx', s: 'frost' });
     } else if (w.id === 'hwacha' || w.id === 'u_hwacha') {   // 일제 사격
       const tn = nearestN(S, 1, 400)[0]; if (!tn) { w.cd = 0.2; continue; }
       const a0 = Math.atan2(tn.y - p.y, tn.x - p.x), sp = Math.min(0.11, 1.3 / s.n), er = s.r * A * p.boomMul;
       for (let i = 0; i < s.n; i++) { const a = a0 + (i - (s.n - 1) / 2) * sp + (S.R() - 0.5) * 0.06, v = s.spd * (0.9 + S.R() * 0.2); S.pr.push({ k: 'rocket', x: p.x, y: p.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, a, dmg: s.dmg, er, pierce: s.pierce || 1, life: 0.95 + S.R() * 0.15, r: 6, hit: new Set(), fire: w.id === 'u_hwacha', evo: w.evo }); }
-      anim(S, 'throw', a0); S.ev.push({ k: 'sfx', s: 'throw' });
+      anim(S, 'throw', a0); S.ev.push({ k: 'sfx', s: 'rocket' });
     } else if (w.id === 'bomb') {   // 시한폭탄
       let made = 0;
       for (let k = 0; k < s.n; k++) {
@@ -482,7 +484,7 @@ function weapons(S, dt) {
         for (const e of S.en) { if (e.dead) continue; const dx = e.x - p.x, dy = e.y - p.y, al = dx * ux + dy * uy; if (al < -e.r || al > len + e.r) continue; if (Math.abs(dx * -uy + dy * ux) < bw / 2 + e.r) hurtEnemy(S, e, s.dmg, ux * 60, uy * 60); }
         S.fx.push({ k: 'beam', x: p.x, y: p.y, a, len, w: bw, t: 0.32, t0: 0.32, evo: w.evo });
       }
-      anim(S, 'cast', a0); S.ev.push({ k: 'sfx', s: 'thunder' });
+      anim(S, 'cast', a0); S.ev.push({ k: 'sfx', s: 'beam' });
     } else if (w.id === 'water') {   // 이동 장판
       w.cd = s.cd;   // 공격 속도와 무관하게 일정 간격
       if (S.pz.some(z => z.k === 'water' && hyp(z.x - p.x, z.y - p.y) < z.r * 0.6)) continue;
@@ -524,7 +526,7 @@ function shields(S, w, s, dt) {   // 등패: 도는 방패, 적 탄 막기
   for (let i = 0; i < s.n; i++) {
     const a = w.tm + i / s.n * TAU, x = p.x + Math.cos(a) * rad, y = p.y + Math.sin(a) * rad; w.pos[i] = [x, y, a];
     for (const e of near(S, x, y, hr, TMP)) { if ((e.hb.s || 0) > S.t) continue; e.hb.s = S.t + s.hitcd; const d = hyp(e.x - p.x, e.y - p.y) || 1; hurtEnemy(S, e, s.dmg, (e.x - p.x) / d * s.kb, (e.y - p.y) / d * s.kb); }
-    for (const q of S.ep) { if (q.life <= 0 || hyp(q.x - x, q.y - y) > hr + q.r) continue; q.life = 0; S.fx.push({ k: 'pop', x: q.x, y: q.y, r: 8, t: 0.25, c: '#ffd36b' });
+    for (const q of S.ep) { if (q.life <= 0 || hyp(q.x - x, q.y - y) > hr + q.r) continue; q.life = 0; S.fx.push({ k: 'pop', x: q.x, y: q.y, r: 8, t: 0.25, c: '#ffd36b' }); sfx(S, 'clang', 0.09);
       if (s.reflect) { const t = S.boss || nearestN(S, 1, 400)[0], an = t ? Math.atan2(t.y - q.y, t.x - q.x) : Math.atan2(-q.vy, -q.vx); S.pr.push({ k: 'refl', x: q.x, y: q.y, vx: Math.cos(an) * 420, vy: Math.sin(an) * 420, a: an, dmg: s.dmg * 1.5, pierce: 2, life: 1.2, r: 8, hit: new Set(), col: q.k }); } }
   }
 }
@@ -549,7 +551,7 @@ function curses(S, dt) {   // 제웅 저주 피해
   S.cursed = keep;
 }
 function retarget(S, q, x, y, r) { let b = null, bd = r; for (const o of near(S, x, y, r, TMP2)) { if (o.seg || q.hit.has(o.id)) continue; const d = hyp(o.x - x, o.y - y); if (d < bd) { bd = d; b = o; } } return b; }
-function explode(S, x, y, r, dmg, c) { for (const e of near(S, x, y, r, TMP2)) hurtEnemy(S, e, dmg, 0, 0); S.fx.push({ k: 'blast', x, y, r, t: 0.3, c: c || 'fire2' }); }
+function explode(S, x, y, r, dmg, c) { for (const e of near(S, x, y, r, TMP2)) hurtEnemy(S, e, dmg, 0, 0); S.fx.push({ k: 'blast', x, y, r, t: 0.3, c: c || 'fire2' }); sfx(S, 'boom', 0.12); }
 function projectiles(S, dt) {
   const keep = [], p = S.p;
   for (const q of S.pr) {
@@ -581,7 +583,7 @@ function projectiles(S, dt) {
       if (!q.tgt) q.life = 0;
       else if (hyp(q.tgt.x - q.x, q.tgt.y - q.y) < q.r + q.tgt.r) { const e = q.tgt, id = e.seg ? e.par.id : e.id; q.hit.add(id); hurtEnemy(S, e, q.dmg, q.vx * 0.15, q.vy * 0.15);
         if (q.coin && e.dead && !e.boss && S.R() < q.coin * 3) S.drops.push({ k: 'coin', x: e.x, y: e.y });
-        S.fx.push({ k: 'pop', x: q.x, y: q.y, r: 10, t: 0.2, c: '#f2c14e' });
+        S.fx.push({ k: 'pop', x: q.x, y: q.y, r: 10, t: 0.2, c: '#f2c14e' }); sfx(S, 'bonk', 0.05);
         if (--q.bounce < 0) q.life = 0; else { q.tgt = retarget(S, q, q.x, q.y, 190); if (!q.tgt) q.life = 0; } }
     } else if (q.k === 'fox') {
       for (const e of near(S, q.x, q.y, q.r, TMP)) { const id = e.seg ? e.par.id : e.id; if (q.hit.has(id)) continue; q.hit.add(id); hurtEnemy(S, e, q.dmg, 0, 0);
@@ -621,7 +623,7 @@ function projectiles(S, dt) {
       if (z.t <= 0 && z.burst) { for (const e of near(S, z.x, z.y, z.r, TMP)) hurtEnemy(S, e, z.burst, 0, 0); S.fx.push({ k: 'boom', x: z.x, y: z.y, r: z.r, t: 0.4, c: '#c58bff' }); }
       if (z.soul) { z.st -= dt; if (z.st <= 0) { z.st = 0.35; const c = near(S, z.x, z.y, z.r * 2.2, TMP); const e = c.length ? c[(S.R() * c.length) | 0] : null; if (e && !e.seg) { const a = S.R() * TAU; S.pr.push({ k: 'soul', x: z.x, y: z.y, vx: Math.cos(a) * 200, vy: Math.sin(a) * 200, spd: 220, tgt: e, dmg: z.soul, er: z.sr, life: 2.5, r: 8, hit: new Set(), a, evo: true, rm: 1 }); } } }
     }
-    else if (z.k === 'bomb') { if (z.t <= 0) { explode(S, z.x, z.y, z.r, z.dmg, 'fire2'); S.ev.push({ k: 'sfx', s: 'quake' }); for (let i = 0; i < z.chain; i++) { const a = i / z.chain * TAU + S.R(); zk.push({ k: 'bomb', x: z.x + Math.cos(a) * z.r * 0.8, y: z.y + Math.sin(a) * z.r * 0.8, sx: z.x, sy: z.y, t: 0.35 + i * 0.15, t0: 0.35 + i * 0.15, dmg: z.dmg * 0.5, r: z.r * 0.6, chain: 0, small: true }); } } }
+    else if (z.k === 'bomb') { if (z.t <= 0) { explode(S, z.x, z.y, z.r, z.dmg, 'fire2'); S.ev.push({ k: 'sfx', s: 'boom' }); for (let i = 0; i < z.chain; i++) { const a = i / z.chain * TAU + S.R(); zk.push({ k: 'bomb', x: z.x + Math.cos(a) * z.r * 0.8, y: z.y + Math.sin(a) * z.r * 0.8, sx: z.x, sy: z.y, t: 0.35 + i * 0.15, t0: 0.35 + i * 0.15, dmg: z.dmg * 0.5, r: z.r * 0.6, chain: 0, small: true }); } } }
     else if (z.k === 'water') { z.tick -= dt; if (z.tick <= 0) { z.tick = 0.5; for (const e of near(S, z.x, z.y, z.r, TMP)) { hurtEnemy(S, e, z.dmg, 0, 0); e.slowT = 0.6; e.slow = Math.max(e.slowT > 0 ? e.slow || 0 : 0, z.slow); } } if (z.heal && hyp(p.x - z.x, p.y - z.y) < z.r) S.inWater = z.heal; }
     else if (z.k === 'burn') { z.tick -= dt; if (z.tick <= 0) { z.tick = 0.4; for (const e of near(S, z.x, z.y, z.r, TMP)) hurtEnemy(S, e, z.dmg, 0, 0); } }
     if (z.t > 0) zk.push(z);
@@ -767,7 +769,7 @@ function pickups(S, dt) {
     const d = hyp(g.x - p.x, g.y - p.y);
     if (!g.fly && d < p.mag) g.fly = true;
     if (g.fly) { g.vs = Math.min(700, g.vs + 900 * dt); const k = Math.min(1, g.vs * dt / (d || 1)); g.x += (p.x - g.x) * k; g.y += (p.y - g.y) * k; }
-    if (d < 14) { g.got = true; S.xp += g.v * p.xpMul; }
+    if (d < 14) { g.got = true; S.xp += g.v * p.xpMul; sfx(S, 'xp', 0.04); }
   }
   S.gems = S.gems.filter(g => !g.got);
   while (S.xp >= S.need) { S.xp -= S.need; S.lv++; S.need = D.xpNeed(S.lv); S.pendingLv++; S.ev.push({ k: 'level' }); }

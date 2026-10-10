@@ -1,4 +1,4 @@
-/* 퇴마 서바이버 — 온라인 랭킹 (Supabase) */
+/* 퇴마 서바이벌 — 온라인 랭킹 (Supabase) */
 (function () {
 const st = { avail: false, ready: false, user: null, nick: '', err: '', askNick: false };
 let sb = null, onChange = () => {};

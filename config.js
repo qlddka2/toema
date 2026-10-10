@@ -4,6 +4,7 @@ window.TOEMA_CONFIG = {
   supabaseUrl: 'https://rofphqdqwxmjkypmjtok.supabase.co',
   // 안드로이드 앱 전용 (모두 공개돼도 되는 값)
   android: {
+    testAds: true,                      // 테스트 기간엔 true(구글 테스트 광고). 정식 출시 직전에 false 로 바꾸고 다시 빌드
     admobAppId: 'ca-app-pub-7930587957278915~7696569254',
     rewarded: 'ca-app-pub-7930587957278915/6615421871',
     interstitial: 'ca-app-pub-7930587957278915/7928503547',

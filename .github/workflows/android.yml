@@ -1,4 +1,4 @@
-# 퇴마 서바이버 안드로이드 빌드: GitHub 저장소 → Actions → "Android build" → Run workflow
+# 퇴마 서바이벌 안드로이드 빌드: GitHub 저장소 → Actions → "Android build" → Run workflow
 # 결과: 아티팩트 toema-android (Play Console 업로드용 .aab + 폰 설치 테스트용 .apk)
 name: Android build
 on:

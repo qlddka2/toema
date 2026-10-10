@@ -1,7 +1,7 @@
-/* 퇴마 서바이버 — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
+/* 퇴마 서바이벌 — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
 (function (G) {
 const D = {};
-D.VERSION = '3.3.0';
+D.VERSION = '3.4.0';
 
 /* ───── 주인공 ─────
    unlock: 해금 조건 (없으면 처음부터) */
@@ -10,8 +10,8 @@ D.HEROES = {
     desc: '여의봉을 크게 휘둘러 주변을 쓸어버립니다. 체력과 방어가 높아요.', trait: '근접 피해 +20%' },
   uchi: { name: '우치', title: '부적을 날리는 떠돌이 도사', cls: '원거리', hp: 110, armor: 1, speed: 106, weapon: 'talisman', cdMul: 0.95,
     desc: '가까운 적에게 부적을 날립니다. 발이 빠르고 술법이 빨라요.', trait: '공격 속도 +5%' },
-  bari: { name: '바리', title: '저승길을 여는 무녀', cls: '지원', hp: 105, armor: 1, speed: 102, weapon: 'bell', regen: 0.5,
-    desc: '방울 소리가 퍼지며 주변 적을 밀어내요. 스스로 상처를 치유합니다.', trait: '초당 체력 회복 +0.5', unlock: { k: 'clear', ch: 1, txt: '1장 클리어' } },
+  bari: { name: '바리', title: '저승길을 여는 무녀', cls: '지원', hp: 120, armor: 2, speed: 102, weapon: 'bell', regen: 0.8,
+    desc: '방울 소리가 퍼지며 주변 적을 밀어내요. 스스로 상처를 치유합니다.', trait: '초당 체력 회복 +0.8', unlock: { k: 'clear', ch: 1, txt: '1장 클리어' } },
   gildong: { name: '길동', title: '바람처럼 사라지는 의적', cls: '기동', hp: 95, armor: 0, speed: 116, weapon: 'knives', goldMul: 1.2,
     desc: '가까운 적에게 비도를 부채꼴로 연달아 던져요. 가장 빠르고 금화를 더 줍습니다.', trait: '금화 +20%', unlock: { k: 'kills', n: 3000, txt: '누적 처치 3,000' } },
   gangrim: { name: '강림', title: '염라의 명을 받은 차사', cls: '술법', hp: 110, armor: 1, speed: 100, weapon: 'soulfire', xpMul: 1.1,
@@ -117,13 +117,13 @@ D.WEAPONS = {
     evo: { name: '태풍선', with: 'swift', desc: '네 방향으로 거대한 바람이 휘몰아쳐요', s: { dmg: 44, cd: 1.5, w: 150, range: 360, dirs: 4, kb: 910, stun: 0.3 } } },
   bell: { name: '무령', icon: 'bell', desc: '방울 소리가 둥글게 퍼져 적을 밀어내요',
     lv: [
-      { dmg: 14, cd: 2.0, r: 110, kb: 240, slow: 0.2 },
-      { dmg: 19, cd: 2.0, r: 120, kb: 260, slow: 0.2 },
-      { dmg: 19, cd: 1.7, r: 135, kb: 280, slow: 0.3 },
-      { dmg: 26, cd: 1.6, r: 150, kb: 300, slow: 0.3 },
-      { dmg: 34, cd: 1.4, r: 165, kb: 340, slow: 0.4 } ],
-    up: ['피해 +5, 범위 증가', '빨라짐, 둔화 증가', '피해 +7, 범위 증가', '피해 +8, 범위·빠르기 증가'],
-    evo: { name: '천상무령', with: 'magnet', desc: '두 번 울리고 구슬까지 끌어와요', s: { dmg: 37, cd: 1.2, r: 210, kb: 400, slow: 0.5, twice: true } } },
+      { dmg: 17, cd: 1.9, r: 115, kb: 240, slow: 0.2 },
+      { dmg: 23, cd: 1.9, r: 125, kb: 260, slow: 0.2 },
+      { dmg: 23, cd: 1.6, r: 140, kb: 280, slow: 0.3 },
+      { dmg: 31, cd: 1.5, r: 155, kb: 300, slow: 0.3 },
+      { dmg: 41, cd: 1.3, r: 170, kb: 340, slow: 0.4 } ],
+    up: ['피해 +6, 범위 증가', '빨라짐, 둔화 증가', '피해 +8, 범위 증가', '피해 +10, 범위·빠르기 증가'],
+    evo: { name: '천상무령', with: 'magnet', desc: '두 번 울리고 구슬까지 끌어와요', s: { dmg: 45, cd: 1.1, r: 215, kb: 400, slow: 0.5, twice: true } } },
   knives: { name: '비도', icon: 'knives', desc: '가까운 적에게 단검을 부채꼴로 던져요',
     lv: [
       { dmg: 9, cd: 0.45, n: 1, pierce: 1, spd: 440 },

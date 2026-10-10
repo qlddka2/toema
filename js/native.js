@@ -1,4 +1,4 @@
-/* 퇴마 서바이버 — 안드로이드 앱 전용 기능 (광고·결제·구글 로그인·뒤로가기)
+/* 퇴마 서바이벌 — 안드로이드 앱 전용 기능 (광고·결제·구글 로그인·뒤로가기)
    웹(브라우저)에서는 아무 일도 하지 않고 NATIVE.on = false 로 둡니다.
    광고·결제·로그인 설정값은 config.js 의 TOEMA_CONFIG.android 에 있습니다. */
 (function () {
@@ -8,8 +8,8 @@ const P = name => (on && Cap.Plugins && Cap.Plugins[name]) || null;
 const cfg = () => ((window.TOEMA_CONFIG || {}).android || {});
 // 구글이 공개한 테스트용 광고 단위 (실제 ID가 비어 있으면 이걸로 동작 확인)
 const TEST = { rewarded: 'ca-app-pub-3940256099942544/5224354917', interstitial: 'ca-app-pub-3940256099942544/1033173712' };
-const unit = k => cfg()[k] || TEST[k];
-const isTest = k => !cfg()[k];
+const unit = k => (cfg().testAds ? '' : cfg()[k]) || TEST[k];
+const isTest = k => !!cfg().testAds || !cfg()[k];
 
 const N = { on, ready: false, price: '', owned: false };
 

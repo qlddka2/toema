@@ -1,4 +1,4 @@
-/* 퇴마 서바이버 — 화면·조작·흐름·보상 */
+/* 퇴마 서바이벌 — 화면·조작·흐름·보상 */
 (function () {
 'use strict';
 const D = window.DATA, C = window.CORE, A = window.ART, RK = window.RANK;
