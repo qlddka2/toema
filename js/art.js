@@ -336,7 +336,7 @@ const ICON_IMG = ['staff', 'talisman', 'thunder', 'beads', 'aura', 'fan', 'bell'
   'u_thunder', 'u_soul', 'u_hwacha', 'u_sword', 'u_bell', 'u_quake', ...['thunder', 'coin', 'herb', 'mirror', 'bell', 'scale', 'shoes', 'hat', 'sword', 'horn', 'pouch', 'bronze', 'ledger', 'ginseng', 'thread', 'jangseung'].map(k => 'r_' + k)];   // 값 = 게임 안에서 그릴 상자 크기
 const IMG = {};
 A.loadImages = function (base, done) {
-  const ks = Object.keys(IMG_LIST).concat(ICON_IMG.map(i => 'icon_' + i), ['coin', 'bag', 'chest', 'heal', 'magnet'].map(i => 'item_' + i), ['grass', 'swamp', 'snow', 'ash', 'sea', 'night'].map(i => 'ground_' + i), ['imugi', 'cy'].flatMap(k => ['head', 'roar', 'segA', 'segB', 'tail'].map(i => k + '_' + i))); let n = ks.length;
+  const ks = Object.keys(IMG_LIST).concat(ICON_IMG.map(i => 'icon_' + i), ['coin', 'bag', 'chest', 'heal', 'magnet'].map(i => 'item_' + i), ['grass', 'swamp', 'snow', 'ash', 'sea', 'night', 'cave'].map(i => 'ground_' + i), 'portal_down', 'portal_home', 'gchest_elite', 'gchest_boss', ['imugi', 'cy'].flatMap(k => ['head', 'roar', 'segA', 'segB', 'tail'].map(i => k + '_' + i))); let n = ks.length;
   for (const k of ks) { const im = new Image(); im.onload = () => { IMG[k] = im; cache.clear(); URLC.clear(); if (--n === 0 && done) done(); }; im.onerror = () => { if (--n === 0 && done) done(); }; im.src = base + k + '.png'; }
 };
 A.hasImg = k => !!IMG[k];
@@ -435,10 +435,10 @@ function weed(x, px, py, s, c) { for (let k = -1; k <= 1; k++) for (const [w, cc
 function mushroom(x, px, py, s) { path(x, [px - s * 0.3, py, px + s * 0.3, py, px + s * 0.25, py - s, px - s * 0.25, py - s], '#e8dcc4', GOL, 1); x.beginPath(); x.arc(px, py - s, s * 0.8, Math.PI, 0); x.closePath(); x.fillStyle = '#b84a8a'; x.fill(); x.strokeStyle = GOL; x.lineWidth = 1.1; x.stroke(); ell(x, px - s * 0.3, py - s * 1.3, s * 0.15, s * 0.15, '#f3d9ec'); }
 
 A.ground = function (ch) {
-  const key = 'g' + ch.id + ch.theme; let c = cache.get(key); if (c) return c;
+  const key = 'g' + ch.id + ch.theme + (ch.gtint || ''); let c = cache.get(key); if (c) return c;
   const S = 256, [cv, x] = C(S, S), R = (G.CORE ? G.CORE.rng(ch.id * 99 + 7) : Math.random), T = THEME[ch.theme] || THEME.grass;
   const gi = IMG['ground_' + ch.theme];
-  if (gi) { const [c2, x2] = C(512, 512); x2.drawImage(gi, 0, 0, 512, 512); if (ch.theme === 'snow') { x2.fillStyle = 'rgba(25,35,60,.22)'; x2.fillRect(0, 0, 512, 512); } c2.ws = 420; cache.set(key, c2); return c2; }   // 그림 타일: 화면에서 크게 깔아 반복이 덜 보이게   // 그림 타일이 있으면 그걸 사용
+  if (gi) { const [c2, x2] = C(512, 512); x2.drawImage(gi, 0, 0, 512, 512); if (ch.theme === 'snow') { x2.fillStyle = 'rgba(25,35,60,.22)'; x2.fillRect(0, 0, 512, 512); } if (ch.gtint) { x2.fillStyle = ch.gtint; x2.fillRect(0, 0, 512, 512); } c2.ws = 420; cache.set(key, c2); return c2; }   // 그림 타일: 화면에서 크게 깔아 반복이 덜 보이게   // 그림 타일이 있으면 그걸 사용
   // 1) 붓질 같은 얼룩 바탕 (픽셀 단위)
   const W = cv.width, H = cv.height, img = x.createImageData(W, H), d = img.data;
   const n1 = tileNoise(R, 4), n2 = tileNoise(R, 9), n3 = tileNoise(R, 22), n4 = tileNoise(R, 6);

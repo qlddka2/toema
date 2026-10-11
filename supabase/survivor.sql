@@ -68,7 +68,7 @@ end $$;
 
 -- ───────── 판 종료: 점수는 서버가 계산 (앱과 같은 공식) ─────────
 --   챕터: 10×min(생존초,600) + 처치 + 중간보스 1500 + 클리어 (5000 + max(0,180−보스처치초)×20 + 연장전초×40)
---   백귀야행: 10×생존초 + 처치 + 우두머리 처치×2000
+--   백귀야행: 10×생존초 + 처치 + 우두머리 처치×2000 + 도달한 층 보너스 (v3.9: p_ot = 층, 2층 3000 · 3층 8000 · 4층 15000)
 drop function if exists public.sv_finish(uuid, int, int, boolean, boolean, int);
 create or replace function public.sv_finish(p_run uuid, p_t int, p_kills int, p_mid boolean, p_cleared boolean, p_boss_t int, p_ot int default 0, p_bosses int default 0)
 returns jsonb language plpgsql security definer set search_path = public as $$
@@ -86,7 +86,8 @@ begin
   if p_t > el + 5 then raise exception 'time_mismatch'; end if;
   if endless then
     if p_bosses < 0 or p_bosses > p_t / 150 + 1 then raise exception 'invalid'; end if;
-    sc := 10 * p_t + p_kills + 2000 * p_bosses;
+    if p_ot < 0 or p_ot > 4 or (p_ot >= 2 and p_t < 600 * (p_ot - 1) - 5) then raise exception 'invalid'; end if;
+    sc := 10 * p_t + p_kills + 2000 * p_bosses + case p_ot when 2 then 3000 when 3 then 8000 when 4 then 15000 else 0 end;
   else
     if p_mid and p_t < 300 then raise exception 'invalid'; end if;
     if p_cleared and (p_t < 600 or not p_mid or p_boss_t < 5 or p_boss_t > p_t - 600 + 2) then raise exception 'invalid'; end if;

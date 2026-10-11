@@ -1,7 +1,7 @@
 /* 퇴마 서바이벌 — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
 (function (G) {
 const D = {};
-D.VERSION = '3.6.0';
+D.VERSION = '3.9.0';
 
 /* ───── 주인공 ─────
    unlock: 해금 조건 (없으면 처음부터) */
@@ -462,8 +462,8 @@ D.BOSSES = {
     atk: [{ t: 'ring', n: 12, spd: 115, dmg: 14, k: 'shadow', cd: 2.4 }, { t: 'homing', n: 2, spd: 90, turn: 1.4, dmg: 15, cd: 2.4 }],
     rage: { split: 2, mul: { cd: 0.85 } } },
   jangsanbeom: { name: '장산범', sub: '사람 목소리를 흉내 내는 흰 짐승', spr: 'jangsanbeom', hp: 8400, spd: 84, dmg: 20, r: 32, move: 'chase', gold: 120, night: true,
-    atk: [{ t: 'ambush', r: 84, dmg: 30, fake: 1, cd: 1.8 }, { t: 'dash', aim: 0.7, spd: 460, dur: 0.5, rest: 0.6, cd: 1.8 }],
-    rage: { mul: { cd: 0.8 }, atk: [{ t: 'ambush', r: 90, dmg: 30, fake: 2, cd: 1.2 }, { t: 'ambush', r: 90, dmg: 30, fake: 2, cd: 1.6 }, { t: 'dash', aim: 0.6, spd: 480, dur: 0.5, rest: 0.5, cd: 1.6 }] } },
+    atk: [{ t: 'ambush', r: 76, dmg: 28, fake: 1, cd: 0.6 }, { t: 'dash', aim: 0.8, spd: 440, dur: 0.5, rest: 0.6, cd: 1.8 }],
+    rage: { mul: { cd: 0.85 }, atk: [{ t: 'ambush', r: 80, dmg: 28, fake: 2, cd: 0.6 }, { t: 'dash', aim: 0.7, spd: 460, dur: 0.5, rest: 0.5, cd: 1.4 }, { t: 'ambush', r: 80, dmg: 28, fake: 2, cd: 0.6 }, { t: 'dash', aim: 0.7, spd: 460, dur: 0.5, rest: 0.5, cd: 1.6 }] } },
   songaksi: { name: '손각시', sub: '시집 못 간 처녀의 한', spr: 'songaksi', hp: 13000, spd: 56, dmg: 18, r: 28, move: 'keep', gold: 160, night: true,
     atk: [{ t: 'wall', w: 560, gap: 110, spd: 95, dmg: 13, k: 'ghost', cd: 2.8 }, { t: 'homing', n: 2, spd: 90, turn: 1.5, dmg: 13, cd: 2.4 }, { t: 'ring', n: 12, spd: 115, dmg: 12, k: 'ghost', cd: 2.4 }],
     rage: { mul: { n: 1.35, cd: 0.8 } } },
@@ -485,11 +485,13 @@ D.BOSSES = {
    waves: [시작초, 초당 스폰, {종류:가중치}]
    events: 정해진 시각의 엘리트·포위·보스 */
 const W = (base, mix) => [[0, 1.7 * base, mix[0]], [60, 2.5 * base, mix[1]], [120, 3.4 * base, mix[2]], [180, 4.2 * base, mix[3]], [240, 4.6 * base, mix[3]], [300, 5.0 * base, mix[4]], [420, 6.2 * base, mix[4]], [540, 7.6 * base, mix[5]], [600, 1.2, mix[0]]];
-const EV = (ring1, ring2, ring3, elite, mid, fin) => [[150, 'ring', ring1, 22], [200, 'elite', elite], [300, 'boss', mid], [380, 'ring', ring2, 30], [450, 'elite', elite], [500, 'ring', ring3, 36], [530, 'elite', elite], [600, 'boss', fin]];
+// v3.8 템포: 첫 정예(보물 상자) 3:20→1:00, 첫 포위 2:30→1:40 — 처음 2분이 심심하지 않게
+const EV = (ring1, ring2, ring3, elite, mid, fin) => [[60, 'elite', elite], [100, 'ring', ring1, 22], [300, 'boss', mid], [380, 'ring', ring2, 30], [450, 'elite', elite], [500, 'ring', ring3, 36], [530, 'elite', elite], [600, 'boss', fin]];
 D.CHAPTERS = [
   { id: 1, name: '버려진 산골', sub: '좀비가 된 짐승들이 마을을 덮쳤다', theme: 'grass', hpMul: 1.15, dmgMul: 1.05, clearGold: 110, firstGold: 300,
+    finBoss: { hp: 1.5, dmg: 1.25, n: 1.4, cd: 0.8 },   // v3.8: 첫 판 클리어율 약 70% 목표
     waves: W(1, [{ dog: 1 }, { dog: 3, crow: 2 }, { dog: 3, crow: 2, boar: 1 }, { dog: 3, crow: 3, boar: 2 }, { dog: 3, crow: 3, boar: 3 }, { dog: 3, crow: 4, boar: 4 }]),
-    events: EV('crow', 'dog', 'crow', 'bear', 'tiger', 'fox') },
+    events: [[40, 'ring', 'dog', 18], ...EV('crow', 'dog', 'crow', 'bear', 'tiger', 'fox')] },   // 1장만: 0:40 들개 무리가 한꺼번에
   { id: 2, name: '썩은 늪', sub: '늪 깊은 곳에서 무언가 꿈틀댄다', theme: 'swamp', hpMul: 1.4, dmgMul: 1.15, clearGold: 200, firstGold: 500,
     waves: W(0.95, [{ wolf: 2, bat: 1 }, { wolf: 3, bat: 2 }, { wolf: 3, bat: 3, snake: 1 }, { wolf: 3, bat: 3, snake: 2 }, { wolf: 3, bat: 3, snake: 3 }, { wolf: 3, bat: 4, snake: 4 }]),
     events: EV('bat', 'wolf', 'bat', 'buffalo', 'bulga', 'imugi') },
@@ -522,7 +524,62 @@ D.ENDLESS = (() => {
   const otBosses = ['gangcheori', 'bulga', 'dueoksini', 'haetae', 'samdugumi', 'hwaseo', 'yeomra', 'hyeonmu'];
   return { id: 6, endless: true, name: '백귀야행', sub: '온갖 요괴가 밤길을 행진한다', theme: 'night', hpMul: 1.15, dmgMul: 1.05, clearGold: 0, firstGold: 0, waves, events, otBosses };
 })();
-D.escore = (t, kills, bosses) => 10 * t + kills + 2000 * bosses;
+/* ───── v3.9 백귀야행 층 구조 ─────
+   층마다 10분짜리 새 행렬(잡몹·정예·우두머리 2마리)이 시작되고, 10분이 되면 포탈이 열림.
+   포탈: 내려가기(더 어렵고 더 좋은 장비) / 귀환(판을 끝내고 이번 판 장비를 챙김). 4층은 5분마다 귀환 포탈만 1분 동안 열림.
+   난이도 단계(f) = 연장전 배율(D.OT)을 그대로 씀.  층 입장: f = max(base, 지금 f + jump) · 층 안: f += 초 × rate · 포탈이 열린 뒤 머물면 f += 초 × stay */
+D.PORTAL = { at: 600, walk: [6, 8], far: 12, r: 34, homeEvery: 300, homeOpen: 60 };
+D.FLOOR_RULE = { jump: 1, stay: 1 / 45, hardMul: 1.15 };
+(() => {
+  const C = D.CHAPTERS, mixW = (a, b) => a.map((w, i) => [w[0], (w[1] + b[i][1]) / 2, Object.assign({}, w[2], b[i][2])]);
+  const half = (ws, off) => ws.filter(w => w[0] < 600).map(w => [off + w[0] / 2, w[1], w[2]]);
+  // 한 층 행렬: 0:40 정예 · 1:40 포위 · 4:00 중간 우두머리 · 5:00 포위 · 6:00·7:30 정예 · 7:00 포위 · 8:00 층 우두머리
+  const EVF = (rings, elites, mid, fin) => [[40, 'elite', elites[0]], [100, 'ring', rings[0], 24], [240, 'boss', mid], [300, 'ring', rings[1], 30], [360, 'elite', elites[1]], [420, 'ring', rings[2], 36], [450, 'elite', elites[1]], [480, 'boss', fin]];
+  D.FLOORS = [
+    { n: 1, name: '귀문 어귀', sub: '산골과 늪의 요괴가 길을 막는다', theme: 'night', tier: [0, 1], waves: half(C[0].waves, 0).concat(half(C[1].waves, 300)),
+      events: [[30, 'ring', 'dog', 18], ...EVF(['crow', 'bat', 'wolf'], ['bear', 'buffalo'], 'tiger', 'fox')], stay: ['bulga', 'imugi', 'haetae'], base: 0, rate: 0, boss: { hp: 1, dmg: 1 } },
+    { n: 2, name: '요괴 소굴', sub: '서리와 불의 요괴가 뒤엉킨 굴', theme: 'cave', tier: [2, 3], waves: half(C[2].waves, 0).concat(half(C[3].waves, 300)),
+      events: EVF(['fcrow', 'hbat', 'hdog'], ['fbear', 'hbuff'], 'geuseundae', 'eoduksini'), stay: ['baekho', 'hwaseo', 'jujak'], base: 1, rate: 1 / 120, boss: { hp: 2, dmg: 1.2 } },
+    { n: 3, name: '저승 문턱', sub: '산 자는 돌아가지 못한다는 고개', theme: 'ash', gtint: 'rgba(70,0,30,.32)', tier: [3, 4], waves: mixW(C[4].waves, C[3].waves).filter(w => w[0] < 600),
+      events: EVF(['dbat', 'dwolf', 'hcrow'], ['dbear', 'hbuff'], 'jangsanbeom', 'songaksi'), stay: ['gangcheori', 'hyeonmu', 'cheongryong'], base: 6, rate: 1 / 120, boss: { hp: 3.5, dmg: 1.4 } },
+    { n: 4, name: '염라전', sub: '저승의 심판관이 기다린다', theme: 'cave', gtint: 'rgba(40,0,70,.42)', tier: [4, 4], waves: [[0, 6.2, { dwolf: 3, dbat: 3, dsnake: 3, hdog: 2 }]],
+      events: [[20, 'elite', 'dbear'], [60, 'ring', 'dwolf', 36], [150, 'boss', 'dueoksini'], [240, 'elite', 'hbuff'], [330, 'boss', 'samdugumi'], [420, 'ring', 'dbat', 40], [510, 'boss', 'yeomra']],
+      stay: ['dueoksini', 'samdugumi', 'yeomra', 'gangcheori'], base: 12, rate: 1 / 170, boss: { hp: 4.5, dmg: 1.5 }, last: true },
+  ];
+})();
+D.FLOOR_SCORE = [0, 3000, 8000, 15000];   // 도달한 층 보너스 (서버 공식과 같음)
+D.escore = (t, kills, bosses, floor = 1) => 10 * t + kills + 2000 * bosses + (D.FLOOR_SCORE[Math.max(1, Math.min(4, floor)) - 1] || 0);
+
+/* ───── v3.9 장비 (백귀야행 전용) ─────
+   몸·발·장신구 3칸. 등급 4단계(평범·고급·희귀·전설) = 능력치 배율. 전설은 고유 효과 추가(4종).
+   얻는 곳: 백귀야행의 정예(일부)·우두머리(항상)가 떨군 장비 상자. 귀환해야 내 것, 쓰러지면 입고 간 장비까지 잃음 */
+D.GRADES = [
+  { name: '평범', col: '#d8d2c4', mul: 1 },
+  { name: '고급', col: '#6ee08a', mul: 1.7 },
+  { name: '희귀', col: '#6ab8ff', mul: 2.5 },
+  { name: '전설', col: '#f2c14e', mul: 3.6 },
+];
+D.GSLOTS = { body: '몸', feet: '발', acc: '장신구' };
+// stat: hp 최대체력% · cut 받는 피해 감소% · dmg 주는 피해% · spd 이동% · mag 흡수 범위% · regen 초당 회복 · kheal 처치 회복 · crit 치명타 · cd 공격 속도
+D.GEAR = {
+  armor:   { name: '가죽 갑옷',   icon: 'armor',   slot: 'body', stat: { cut: 0.10 } },
+  shield:  { name: '범 무늬 방패', icon: 'shield',  slot: 'body', stat: { hp: 0.18 } },
+  sinjang: { name: '신장 갑주',   icon: 'sinjang', slot: 'body', stat: { cut: 0.06, hp: 0.10 }, leg: { id: 'aegis', name: '신장의 가호', desc: '체력이 30% 밑으로 떨어지면 4초 무적 (층마다 1번)' } },
+  shoes:   { name: '바람 신발',   icon: 'r_shoes', slot: 'feet', stat: { spd: 0.06, mag: 0.2 } },
+  swift:   { name: '날개 장화',   icon: 'swift',   slot: 'feet', stat: { spd: 0.04, cd: 0.05 }, leg: { id: 'gale', name: '질풍', desc: '움직이는 동안 받는 피해 −15%' } },
+  beads:   { name: '나무 염주',   icon: 'beads',   slot: 'acc', stat: { regen: 0.8 } },
+  guard:   { name: '수호 구슬',   icon: 'guard',   slot: 'acc', stat: { crit: 0.04, cut: 0.04 } },
+  foxbead: { name: '여우구슬',    icon: 'foxbead', slot: 'acc', stat: { kheal: 0.2 }, leg: { id: 'foxfire', name: '여우불', desc: '요괴를 쓰러뜨리면 10% 확률로 여우불이 날아가 폭발' } },
+  feather: { name: '삼족오 깃털', icon: 'feather', slot: 'acc', stat: { dmg: 0.15 }, leg: { id: 'sun', name: '태양의 깃', desc: '7초마다 주변에 불꽃이 터짐' } },
+};
+D.gearStat = (id, g) => { const b = D.GEAR[id].stat, m = D.GRADES[g].mul, o = {}; for (const k in b) o[k] = b[k] * m; return o; };
+D.gearText = (id, g) => { const s = D.gearStat(id, g), P = v => Math.round(v * 100) + '%';
+  return [s.hp && `최대 체력 +${P(s.hp)}`, s.cut && `받는 피해 −${P(s.cut)}`, s.dmg && `주는 피해 +${P(s.dmg)}`, s.spd && `이동 속도 +${P(s.spd)}`, s.mag && `구슬 흡수 범위 +${P(s.mag)}`,
+    s.regen && `초당 체력 회복 +${s.regen.toFixed(1)}`, s.kheal && `처치할 때 체력 +${s.kheal.toFixed(2)}`, s.crit && `치명타 확률 +${P(s.crit)}`, s.cd && `공격 속도 +${P(s.cd)}`].filter(Boolean).join(' · '); };
+// 층별 등급 확률 [평범, 고급, 희귀, 전설] — 층마다 최고 등급 상한. 우두머리 상자는 굴린 뒤 한 단계 위(층 상한까지)
+D.GEAR_DROP = { odds: [[85, 15, 0, 0], [35, 55, 10, 0], [10, 45, 45, 0], [0, 30, 50, 20]], cap: [1, 2, 2, 3], elite: 0.2, otElite: 0.04, mid: 0.5 };
+D.GEAR_BAG = 40;                        // 보관함 칸 수
+D.GEAR_SELL = [40, 120, 350, 900];     // 등급별 판매 금화
 /* 랭킹 번호: 보통 백귀야행 1000+주, 어려움 백귀야행 5000+주 / 해금: 보통·어려움 3장 클리어 */
 D.ekey = (hard, w = D.weekNo()) => (hard ? 5000 : 1000) + w;
 D.ENDLESS_UNLOCK = 3;
@@ -552,6 +609,8 @@ D.HARD = { spawnMul: 1.15, goldMul: 1.6, firstGold: 2 };
    hp·dmg: 잡몹·우두머리 체력/피해 배율, boss: 우두머리 체력 추가 배율 (3장부터 '화력 체크' 벽)
    REC: 단계별 권장 투자 — 영구 강화에 쓴 금화(b)와 주인공 레벨(l). 권장 전투력은 이걸로 계산 */
 D.TIER = { hp: [1.15, 1.4, 1.65, 1.9, 2.2, 2.6, 3.0], dmg: [1.05, 1.12, 1.2, 1.28, 1.36, 1.46, 1.56], boss: [1, 1.05, 1.3, 1.65, 1.85, 2.3, 2.7] };
+/* v3.8 템포 압축 보정: 첫 상자가 2분 빨라진 만큼 장 모드(백귀야행 제외) 적 체력을 살짝 올려 예전 클리어율 유지 */
+D.TEMPO = { hp: [1.07, 1.07, 1.12, 1.07, 1.07], boss: [1.06, 1.06, 1.1, 1.06, 1.06], hard: { hp: 1.015, boss: 1.0 } };   // 장별(1~5장 보통) · 어려움 공통
 D.tierOf = (ch, hard) => Math.min(D.TIER.hp.length - 1, ch - 1 + (hard ? 2 : 0));
 D.REC = [{ b: 0, l: 1 }, { b: 600, l: 1 }, { b: 4000, l: 3 }, { b: 8000, l: 5 }, { b: 14000, l: 6 }, { b: 20000, l: 8 }, { b: 28000, l: 10 }];
 /* 금화 b로 영구 강화를 고루 산다면 (권장 전투력·봇 측정용) */

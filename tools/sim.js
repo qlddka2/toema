@@ -25,6 +25,8 @@ function bot(S) {
   for (const g of S.gems) { const d = hyp(g.x - p.x, g.y - p.y); if (d < td) { td = d; tgt = g; } }
   if (tgt && td < 260) { const dx = tgt.x - p.x, dy = tgt.y - p.y, d = hyp(dx, dy) || 1; vx += dx / d * 0.9; vy += dy / d * 0.9; }
   else { const a = S.t * 0.25; vx += Math.cos(a) * 0.6; vy += Math.sin(a) * 0.6; }
+  // 백귀야행: 포탈로 가기 (STAY초 머문 뒤)
+  if (S.portal && wantPortal(S)) { const q = S.portal, dx = q.x - p.x, dy = q.y - p.y, d = hyp(dx, dy) || 1; vx += dx / d * 2.2; vy += dy / d * 2.2; }
   if (S.arena) { const A = S.arena, dx = A.x - p.x, dy = A.y - p.y, d = hyp(dx, dy); if (d > A.r * 0.55) { vx += dx / d * 2.5 * (d / A.r); vy += dy / d * 2.5 * (d / A.r); } }
   const n = hyp(vx, vy); return n > 0.01 ? { x: vx / n, y: vy / n } : { x: 0, y: 0 };
 }
@@ -34,19 +36,29 @@ const PRI = { w: { talisman: 9, staff: 9, thunder: 8, beads: 7, aura: 6, fan: 5,
 if (process.env.ONLYNEW === '1') for (const k of ['talisman','staff','thunder','beads','aura','fan','bell','knives','soulfire','quake','bow','gourd','twin']) PRI.w[k] = 1;
 function choose(S) { const cs = C.choices(S, C.optCount(S)); if (cs[0].kind === 'evo' || cs[0].kind === 'jin' || cs[0].kind === 'union') return C.pick(S, cs[0]); const sv = o => o.kind === 'w' ? PRI.w[o.id] + 1 + (SETS && o.set && o.lv === 1 && o.set.have >= 2 ? 3 : 0) : PRI.p[o.id] || 0; cs.sort((a, b) => sv(b) - sv(a)); C.pick(S, cs[0]); }
 
+const STAY = +(process.env.STAY || 0), HOMEF = +(process.env.HOMEF || 0), GEAR = (process.env.GEAR || '').split(',').filter(Boolean).map(x => { const [id, g] = x.split(':'); return { id, g: +g }; });
+function wantPortal(S) { const ft = S.t - S.fT0; if (S.portal.kind === 'home') return HOMEF > 0 && S.floor >= HOMEF; if (HOMEF && S.floor >= HOMEF) return ft >= D.PORTAL.at + STAY; return ft >= D.PORTAL.at + STAY; }
 function run(hero, ch, meta, seed, revive) {
-  const S = C.newRun({ hero, chapter: ch, meta, seed, viewR: 420, hard: HARD, hlv: +(process.env.HLV || 1), weekly: process.env.WK });
+  const S = C.newRun({ hero, chapter: ch, meta, seed, viewR: 420, hard: HARD, hlv: +(process.env.HLV || 1), weekly: process.env.WK, gear: GEAR });
   const dt = 1 / 30; let it = 0, cur = { x: 0, y: 0 }; const rnd = C.rng(seed * 7 + 1);
-  while (it++ < 30 * 60 * 45) {
+  while (it++ < 30 * 60 * 60) {
     if (S.relicAsk) C.relicPick(S, S.relicOpts[0]);
     if (S.otAsk) { if (OT) C.overtime(S); else C.retire(S); }
+    if (S.portalAsk) { if (!wantPortal(S)) C.portalChoose(S, null); else C.portalChoose(S, S.portalAsk === 'home' || (HOMEF && S.floor >= HOMEF) ? 'home' : 'down'); }
     while (S.pendingLv > 0 || S.chests > 0) choose(S);
     if (S.over === 'dead' && revive && !S.revived) C.revive(S);
     if (S.over) break;
     if (!HUMAN || it % HUMAN.every === 0) { cur = bot(S); if (HUMAN) { const a = Math.atan2(cur.y, cur.x) + (rnd() - 0.5) * HUMAN.err; const m = Math.hypot(cur.x, cur.y); cur = { x: Math.cos(a) * m, y: Math.sin(a) * m }; } }
+    const hp0 = S.p.hp, dl0 = Object.assign({}, S.dlog), hadB = S.boss;
     C.step(S, dt, cur);
+    if (process.env.BLOG) {
+      if (S.boss && S.boss !== hadB) S.bl = { id: S.boss.type, t: S.t, hp: Math.round(hp0 / S.p.maxhp * 100), d0: Math.round(Math.hypot(S.boss.x - S.p.x, S.boss.y - S.p.y)), lost: 0, src: {}, minD: 1e9 };
+      if (S.bl && S.t - S.bl.t < 3 && S.boss) { const L = S.bl; L.minD = Math.min(L.minD, Math.round(Math.hypot(S.boss.x - S.p.x, S.boss.y - S.p.y) - S.boss.r - S.p.r)); for (const k in S.dlog) { const v = S.dlog[k] - (dl0[k] || 0); if (v > 0) { L.src[k] = (L.src[k] || 0) + v; L.lost += v; } } }
+      if (S.bl && S.t - S.bl.t >= 3) { const L = S.bl; console.log(`  [${Math.round(L.t)}s] ${L.id} 등장 hp${L.hp}% 거리${L.d0} 최소간격${L.minD} 3초간 피해 ${Math.round(L.lost / S.p.maxhp * 100)}% ${JSON.stringify(Object.fromEntries(Object.entries(L.src).map(([k, v]) => [k, Math.round(v)])))}${S.over ? ' 사망' : ''}`); S.bl = null; }
+      if (S.over === 'dead' && S.bl) { const L = S.bl; console.log(`  [${Math.round(L.t)}s] ${L.id} 등장 hp${L.hp}% 거리${L.d0} 최소간격${L.minD} → ${Math.round(S.t - L.t)}초 만에 사망 ${JSON.stringify(Object.fromEntries(Object.entries(L.src).map(([k, v]) => [k, Math.round(v)])))}`); S.bl = null; }
+    }
   }
-  return { ...C.result(S), over: S.over, hp: S.p.hp, w: S.W.map(w => w.id + (w.jin ? '眞' : w.evo ? '★' : w.lv)).join(',') + (S.relics ? ' [' + S.relics.join(',') + ']' : ''), dlog: S.dlog, bossHp: S.boss ? Math.round(S.boss.hp / S.boss.max * 100) : null, ot: S.ot ? Math.round(S.t - S.ot.t0) : 0, score: C.result(S).score };
+  return { ...C.result(S), over: S.over, fl: S.floor, lootN: (S.loot || []).length, lootG: (S.loot || []).map(x => x.g), hp: S.p.hp, w: S.W.map(w => w.id + (w.jin ? '眞' : w.evo ? '★' : w.lv)).join(',') + (S.relics ? ' [' + S.relics.join(',') + ']' : ''), dlog: S.dlog, bossHp: S.boss ? Math.round(S.boss.hp / S.boss.max * 100) : null, ot: S.ot ? Math.round(S.t - S.ot.t0) : 0, score: C.result(S).score };
 }
 
 const HUMAN = process.env.HUMAN ? { every: +process.env.HUMAN, err: +(process.env.ERR || 1.2) } : null;
@@ -63,6 +75,11 @@ for (const hero of HEROES) {
   const clr = rs.filter(r => r.cleared).length, avgT = rs.reduce((a, r) => a + r.t, 0) / N;
   const mid = rs.filter(r => r.mid).length;
   console.log(`${hero} ch${CH}${HARD?'H':''} meta${ML}${REV ? ' +부활' : ''}: 클리어 ${clr}/${N}, 중보 처치 ${mid}/${N}, 보스 ${Math.round(rs.reduce((a, r) => a + r.bosses, 0) / N * 10) / 10}, 평균 생존 ${Math.round(avgT)}s, 평균 레벨 ${Math.round(rs.reduce((a, r) => a + r.lv, 0) / N)}, 평균 금화 ${Math.round(rs.reduce((a, r) => a + r.gold, 0) / N)}, 킬 ${Math.round(rs.reduce((a, r) => a + r.kills, 0) / N)}${OT || CH === 6 ? `, 연장전 평균 ${Math.round(rs.reduce((a, r) => a + r.ot, 0) / N)}s (최소 ${Math.min(...rs.map(r => r.ot))}·최대 ${Math.max(...rs.map(r => r.ot))}), 점수 ${Math.round(rs.reduce((a, r) => a + r.score, 0) / N)}` : ''} (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
+  if (CH === 6) { const ts = rs.map(r => r.t / 60).sort((a, b) => a - b), q = f => ts[Math.min(ts.length - 1, Math.floor(f * ts.length))].toFixed(1);
+    const b = [0, 20, 25, 30, 35, 40, 99], hist = b.slice(0, -1).map((x, i) => `${x}~${b[i + 1]}분:${ts.filter(t => t >= x && t < b[i + 1]).length}`).join(' ');
+    const fl = [1, 2, 3, 4].map(n => rs.filter(r => r.fl === n).length).join('/'), esc = rs.filter(r => r.escaped).length;
+    const lg = [0, 0, 0, 0]; for (const r of rs) for (const g of r.lootG) lg[g]++;
+    console.log(`    층 분포 1/2/3/4: ${fl} · 귀환 ${esc} · 생존 중앙 ${q(0.5)}분 (10% ${q(0.1)} · 90% ${q(0.9)}) · ${hist} · 판당 장비 ${(rs.reduce((a, r) => a + r.lootN, 0) / N).toFixed(1)}개 등급별 ${lg.join('/')}`); }
   const dl={};for(const r of rs)for(const k in r.dlog)dl[k]=(dl[k]||0)+r.dlog[k];console.log('    피해원:',JSON.stringify(Object.fromEntries(Object.entries(dl).map(([k,v])=>[k,Math.round(v/N)]))));
   console.log('   ', rs.slice(0, 6).map(r => `${r.t}s${r.cleared ? '✔' : ''}${r.bossHp != null ? '(보스' + r.bossHp + '%)' : ''} ${r.w}`).join(' | '));
 }

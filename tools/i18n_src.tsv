@@ -844,3 +844,135 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 염라대왕	King Yeomra	閻魔大王	阎罗王
 저승의 심판관	Judge of the Underworld	冥府の裁判官	冥府的审判者
 우두머리	Bosses	ボス	首领
+화면 흔들림	Screen shake	画面の揺れ	屏幕震动
+## ── v3.8 결과 화면 '조금만 더' ──
+{s} 체력 {n}% 남기고 쓰러졌어요	Fell with {0} at {1}% HP	{0}の体力を{1}%残して倒れた	倒下时{0}只剩{1}%体力
+최종 우두머리까지 {n}분 {n}초 남았어요	{0}m {1}s left until the final boss	最終ボスまであと{0}分{1}秒だった	距离最终首领还差{0}分{1}秒
+{s} 해금까지 처치 {n} 남음	{1} more kills to unlock {0}	{0}解放まであと{1}体撃破	再击败{1}个即可解锁{0}
+{s} 해금까지 우두머리 처치 {n} 남음	{1} more bosses to unlock {0}	{0}解放まであとボス{1}体	再击败{1}个首领即可解锁{0}
+{s} 해금까지 {n}판 남음	{1} more runs to unlock {0}	{0}解放まであと{1}回	再玩{1}局即可解锁{0}
+{s} 해금까지 무기 진화 {n} 남음	{1} more evolutions to unlock {0}	{0}解放まであと進化{1}回	再进化{1}次武器即可解锁{0}
+금화로 지금 강화할 수 있어요	You can upgrade now with gold	今すぐ金貨で強化できます	现在可以用金币强化
+{s} 강화까지 금화 {n} 부족	{1} more gold to upgrade {0}	{0}強化まで金貨{1}不足	强化{0}还差{1}金币
+## ── v3.9 백귀야행 층·포탈·장비 ──
+귀문 어귀	Demon Gate	鬼門の入口	鬼门入口
+산골과 늪의 요괴가 길을 막는다	Mountain and swamp demons block the way	山と沼の妖怪が道をふさぐ	山野与沼泽的妖怪挡住去路
+요괴 소굴	Demon Den	妖怪の巣窟	妖怪巢穴
+서리와 불의 요괴가 뒤엉킨 굴	A cave tangled with frost and fire demons	霜と炎の妖怪がひしめく洞窟	冰霜与火焰妖怪交缠的洞穴
+저승 문턱	Threshold of the Underworld	冥府の門前	冥界门槛
+산 자는 돌아가지 못한다는 고개	A pass the living never return from	生者は戻れぬという峠	据说活人有去无回的山岭
+염라전	Hall of Yeomra	閻魔殿	阎罗殿
+저승의 심판관이 기다린다	The judge of the dead awaits	冥府の裁判官が待つ	冥界判官正在等待
+{n}층 {s}	F{0} {1}	{0}層 {1}	{0}层 {1}
+{n}층 · {s}	Floor {0} · {1}	{0}層 · {1}	第{0}层 · {1}
+{n}층 {s}까지	Reached F{0} {1}	{0}層 {1}まで	到达{0}层 {1}
+{n}층	F{0}	{0}層	{0}层
+평범	Common	ノーマル	普通
+고급	Fine	上級	精良
+희귀	Rare	レア	稀有
+전설	Legend	伝説	传说
+몸	Body	胴	身体
+발	Feet	足	脚
+장신구	Trinket	装身具	饰品
+가죽 갑옷	Leather Armor	革の鎧	皮甲
+범 무늬 방패	Tiger Shield	虎模様の盾	虎纹盾
+신장 갑주	Guardian Armor	神将の甲冑	神将甲胄
+바람 신발	Wind Shoes	風の靴	疾风鞋
+날개 장화	Winged Boots	翼のブーツ	羽翼长靴
+나무 염주	Wooden Beads	木の数珠	木念珠
+수호 구슬	Guardian Orb	守護の珠	守护珠
+신장의 가호	Guardian's Blessing	神将の加護	神将庇护
+체력이 {n}% 밑으로 떨어지면 {n}초 무적 (층마다 {n}번)	When HP drops below {0}%, invincible for {1}s (once per floor)	HPが{0}%未満になると{1}秒無敵（各層{2}回）	生命低于{0}%时无敌{1}秒（每层{2}次）
+질풍	Gale	疾風	疾风
+움직이는 동안 받는 피해 −{n}%	Damage taken −{0}% while moving	移動中の被ダメージ −{0}%	移动时受到伤害 −{0}%
+여우불	Foxfire	狐火	狐火
+요괴를 쓰러뜨리면 {n}% 확률로 여우불이 날아가 폭발	Kills have a {0}% chance to launch an exploding foxfire	妖怪を倒すと{0}%の確率で狐火が飛んで爆発	击败妖怪时有{0}%几率放出会爆炸的狐火
+태양의 깃	Sun Plume	太陽の羽	太阳之羽
+{n}초마다 주변에 불꽃이 터짐	Flames burst around you every {0}s	{0}秒ごとに周囲で炎が炸裂	每{0}秒在周围爆发火焰
+전설 등급이면	At Legend grade	伝説等級なら	传说等级时
+받는 피해 −{n}%	Damage taken −{0}%	被ダメージ −{0}%	受到伤害 −{0}%
+주는 피해 +{n}%	Damage dealt +{0}%	与ダメージ +{0}%	造成伤害 +{0}%
+구슬 흡수 범위 +{n}%	Orb pickup range +{0}%	吸収範囲 +{0}%	吸收范围 +{0}%
+초당 체력 회복 +{n}	HP regen +{0}/s	毎秒HP回復 +{0}	每秒回复生命 +{0}
+처치할 때 체력 +{n}	HP +{0} per kill	撃破時HP +{0}	击杀时生命 +{0}
+체력 +{n}%	HP +{0}%	HP +{0}%	生命 +{0}%
+피해 +{n}%	Damage +{0}%	ダメージ +{0}%	伤害 +{0}%
+이동 +{n}%	Move +{0}%	移動 +{0}%	移动 +{0}%
+치명 +{n}%	Crit +{0}%	会心 +{0}%	暴击 +{0}%
+회복 +{n}/초	Regen +{0}/s	回復 +{0}/秒	回复 +{0}/秒
+처치 회복 +{n}	Kill heal +{0}	撃破回復 +{0}	击杀回复 +{0}
+흡수 +{n}%	Pickup +{0}%	吸収 +{0}%	吸收 +{0}%
+착용 효과: {s}	Equipped: {0}	装備効果: {0}	装备效果: {0}
+장비 없음	No gear	装備なし	无装备
+장비 · 백귀야행 전용	Gear · Night Parade only	装備 · 百鬼夜行専用	装备 · 百鬼夜行专用
+쓰러지면 입고 간 장비를 잃어요	Fall and you lose the gear you wore	倒れると装備していた物を失います	倒下会失去所穿戴的装备
+장비함	Gear Stash	装備庫	装备库
+장비함 ({n}/{n})	Gear Stash ({0}/{1})	装備庫 ({0}/{1})	装备库 ({0}/{1})
+팔기	Sell	売る	出售
+착용	Equip	装備	装备
+벗기	Unequip	外す	卸下
+닫기	Close	閉じる	关闭
+비어 있음	Empty	空き	空
+{s} 칸 장비	{0} slot	{0}枠の装備	{0}栏装备
+보관 {n}/{n}	Stored {0}/{1}	保管 {0}/{1}	已存 {0}/{1}
+백귀야행에서 귀환하면 늘어나요	Grows when you return from Night Parade	百鬼夜行から帰還すると増えます	从百鬼夜行归来即可增加
+장비를 누르면 설명이 나와요.	Tap gear to see details.	装備をタップすると説明が出ます。	点击装备查看说明。
+이 칸에 낄 장비가 없어요.	No gear for this slot.	この枠の装備がありません。	此栏没有装备。
+아직 장비가 없어요.	No gear yet.	まだ装備がありません。	还没有装备。
+백귀야행의 정예·우두머리가 떨군	Grab the	百鬼夜行の精鋭・ボスが落とす	捡起百鬼夜行精英·首领掉落的
+장비 상자	gear chests	装備箱	装备箱
+를 줍고 포탈로 귀환하면 내 것이 돼요.	dropped by elites and bosses, then return through a portal to keep them.	を拾ってポータルで帰還すれば自分の物に。	并通过传送门归来即可归你所有。
+{s} 판매 · 금화 +{n}	Sold {0} · Gold +{1}	{0}を売却 · 金貨 +{1}	出售{0} · 金币 +{1}
+포탈	Portal	ポータル	传送门
+포탈 {n}:{n}	Portal {0}:{1}	ポータル {0}:{1}	传送门 {0}:{1}
+포탈 열림	Portal open	ポータル開放	传送门已开启
+머물수록 거세짐	stronger the longer you stay	留まるほど激化	停留越久越凶猛
+귀환 포탈	Return Portal	帰還ポータル	归还传送门
+귀환 포탈 {n}:{n}	Return portal {0}:{1}	帰還ポータル {0}:{1}	归还传送门 {0}:{1}
+귀환 포탈 열림 {n}초	Return portal open {0}s	帰還ポータル開放 {0}秒	归还传送门开启 {0}秒
+귀문 포탈	Demon Gate Portal	鬼門のポータル	鬼门传送门
+아래층으로 내려가기	Descend	下の層へ降りる	下到下一层
+귀환하기 (장비 챙기기)	Return (keep your gear)	帰還する（装備を持ち帰る）	归还（带走装备）
+조금 더 싸우기	Keep fighting	もう少し戦う	再战一会儿
+포탈이 열렸다	The portal is open	ポータルが開いた	传送门开启了
+내려가거나 귀환할 수 있어요	You can descend or return	降りるか帰還できます	可以下行或归还
+머물수록 요괴가 거세져요	Demons grow fiercer the longer you stay	留まるほど妖怪が強くなります	停留越久妖怪越凶猛
+1분 동안만 열려 있어요	Open for only 1 minute	1分間だけ開いています	只开启1分钟
+화살표를 따라가세요	Follow the arrow	矢印に従ってください	跟随箭头
+포탈이 가까이 옮겨졌다	The portal moved closer	ポータルが近くに移った	传送门移近了
+귀환 포탈이 닫혔다	The return portal closed	帰還ポータルが閉じた	归还传送门关闭了
+{n}분 뒤 다시 열려요	Opens again in {0} min	{0}分後に再び開きます	{0}分钟后再次开启
+{n}분 뒤 포탈이 열려요	Portal opens in {0} min	{0}分後にポータルが開きます	{0}分钟后传送门开启
+여기서 판을 끝내고 돌아갈 수 있어요	You can end the run here and go back	ここで終えて帰れます	可以在此结束并返回
+{n}층을 버텨냈다	You survived floor {0}	{0}層を耐え抜いた	撑过了第{0}层
+어디로 갈까요?	Where to?	どこへ行く？	去哪里？
+이번 판에 주운 장비 {n}개	Gear found this run: {0}	今回拾った装備 {0}個	本局拾到的装备 {0}件
+요괴가 한 단계 강해지고 더 좋은 장비가 나와요	Demons get stronger, and better gear drops	妖怪が一段強くなり、より良い装備が出ます	妖怪变强一级，掉落更好的装备
+마지막 층	Final floor	最終層	最后一层
+{n}분마다 귀환 포탈이 열려요	A return portal opens every {0} min	{0}分ごとに帰還ポータルが開きます	每{0}分钟开启归还传送门
+귀환	Return	帰還	归还
+판이 끝나고 주운 장비가 내 것이 돼요	The run ends and the gear you found is yours	プレイが終わり、拾った装備が自分の物になります	本局结束，拾到的装备归你所有
+기록도 인정돼요	Your record counts	記録も認められます	记录也会保留
+더 싸우면 이 층에 머물러요	Keep fighting to stay on this floor	戦い続けるとこの層に留まります	继续战斗则留在本层
+요괴가 계속 거세져요	Demons keep getting fiercer	妖怪がどんどん強くなります	妖怪会越来越凶猛
+주운 장비 {n}개	Gear found: {0}	拾った装備 {0}個	拾到装备 {0}件
+귀환해야 내 것	Yours only if you return	帰還して初めて自分の物	归还后才归你
+장비 획득: {s}	Gear: {0}	装備獲得: {0}	获得装备: {0}
+{s} ★	{0} ★	{0} ★	{0} ★
+평범 {s}	Common {0}	ノーマル{0}	普通{0}
+고급 {s}	Fine {0}	上級{0}	精良{0}
+희귀 {s}	Rare {0}	レア{0}	稀有{0}
+전설 {s}	Legendary {0}	伝説の{0}	传说{0}
+신장의 가호! 잠시 무적	Guardian's Blessing! Briefly invincible	神将の加護！ しばらく無敵	神将庇护！短暂无敌
+귀환 성공!	Returned safely!	帰還成功！	成功归还！
+챙긴 장비 {n}개	Gear kept: {0}	持ち帰った装備 {0}個	带回装备 {0}件
+잃은 장비 {n}개 (입고 간 {n} · 주운 {n})	Gear lost: {0} (worn {1} · found {2})	失った装備 {0}個（装備 {1} · 拾得 {2}）	失去装备 {0}件（穿戴 {1} · 拾得 {2}）
+포탈에서 귀환해야 주운 장비가 내 것이 돼요	Return through a portal to keep the gear you find	ポータルで帰還して初めて拾った装備が自分の物に	通过传送门归还，拾到的装备才归你
+다음엔 정예·우두머리의 장비 상자를 챙겨서 귀환해 보세요	Next time, grab gear chests from elites and bosses before you return	次は精鋭・ボスの装備箱を拾って帰還してみましょう	下次试着捡起精英·首领的装备箱再归还
+장비함이 가득 차서 {n}개는 금화로 바꿨어요	Gear stash full: {0} items converted to gold	装備箱がいっぱいで{0}個を金貨に換えました	装备箱已满，{0}件已换成金币
+우두머리 {n}마리	{0} bosses	ボス{0}体	首领{0}个
+백귀야행 {n}층 {s}	Night Parade F{0} {1}	百鬼夜行 {0}層 {1}	百鬼夜行 {0}层 {1}
+포기하면 입고 온 장비와 주운 장비를 모두 잃어요	Giving up loses all worn and found gear	諦めると装備と拾った装備をすべて失います	放弃将失去所有穿戴和拾到的装备
+4층 요괴 행렬	4-floor demon parade	4層の妖怪行列	4层妖怪行列
+포탈로 귀환하면 장비 획득	return via portal to keep gear	ポータルで帰還すると装備獲得	经传送门归还可获得装备
+어려움 주간 랭킹	Hard weekly ranking	ハード週間ランキング	困难每周排行

@@ -163,6 +163,34 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
 .sw::after{content:'';position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#8d849c;transition:left .2s,background .2s}
 .tg.on .sw{background:var(--gold);box-shadow:none}.tg.on .sw::after{left:24px;background:#fff}
 .tg:not(.on) span{opacity:.6}
+
+/* ── v3.8 첫 화면: 타이틀 일러스트 배경 (제목 글씨는 원래 그대로) ── */
+#s-menu{background:url(img/title_bg.jpg) center top/100% auto no-repeat,#1a1621}
+#s-menu .mspace{flex:1;min-height:150px}
+#s-menu .btn{padding:13px 18px}
+#s-menu .btn.main{padding:14px 18px}
+#s-menu .tag{text-shadow:0 1px 3px #000,0 0 8px #000;color:#e6dcef}
+/* v3.9 장비 · 층 · 포탈 */
+#gearpanel{width:100%;max-width:420px;margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+#gearpanel .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+#gearpanel .gh b{color:var(--gold)}#gearpanel .gh small{color:var(--dim);font-size:11.5px}
+.gslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gslot{position:relative;background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:6px 4px;text-align:center;min-height:86px;color:var(--ink)}
+.gslot small{display:block;font-size:11px;color:var(--dim)}.gslot b{display:block;font-size:12px;line-height:1.25;margin-top:2px}
+.gslot img,.gcell img{width:42px;height:42px;display:block;margin:2px auto 0}
+.gslot.empty img{opacity:.25;filter:grayscale(1)}
+.gsum{font-size:12px;color:var(--dim);margin-top:8px;line-height:1.5}
+.ggrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:42vh;overflow:auto;padding:2px;margin:8px 0}
+.gcell{position:relative;aspect-ratio:1;background:var(--panel2);border:2px solid var(--line);border-radius:10px;padding:2px}
+.gcell.on{outline:2px solid #fff}.gcell .eq{position:absolute;right:2px;top:1px;font-size:10px;font-weight:900;color:#2a1b06;background:var(--gold);border-radius:6px;padding:0 3px}
+.gcell img{width:80%;height:80%;margin:6% auto 0}
+#gearinfo{background:var(--panel2);border-radius:12px;padding:10px;min-height:64px;font-size:13px;line-height:1.5;text-align:left}
+#gearinfo .leg{color:var(--gold)}
+.gtag{display:inline-block;font-size:11px;font-weight:900;border-radius:6px;padding:1px 6px;color:#1b1423;margin-right:4px}
+#floortag{position:absolute;top:calc(36px + env(safe-area-inset-top));left:0;right:0;text-align:center;font-size:12.5px;font-weight:800;color:#d9c7ff;text-shadow:0 1px 3px #000;pointer-events:none}
+#lootchip{position:absolute;top:calc(54px + env(safe-area-inset-top));left:0;right:0;text-align:center;font-size:12px;font-weight:800;color:var(--gold);text-shadow:0 1px 3px #000;pointer-events:none}
+.ploot{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin:6px 0}
+.ploot img{width:34px;height:34px;border-radius:8px;background:#0006;border:2px solid var(--c);padding:1px}
 </style>
 </head>
 <body>
@@ -175,6 +203,7 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
     <div id="hudr"><div id="hkills">0</div><div id="hgold" class="coins"><i></i><span>0</span></div></div>
     <button id="pausebtn" aria-label="일시정지">II</button>
     <div id="slots"><div class="s" id="slw"></div><div class="s" id="slp"></div><div class="s" id="slset"></div><div class="s" id="slr"></div></div>
+    <div id="floortag" class="hide"></div><div id="lootchip" class="hide"></div>
     <div id="bossbar" class="hide"><b id="bossname"></b><div class="bar"><div id="bossfill"></div></div></div>
   </div>
   <div id="banner"></div>
@@ -185,16 +214,17 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
   <section id="s-menu" class="scr">
     <div class="title">퇴마 서바이벌</div>
     <div class="tag">좀비가 된 짐승과 신화 속 괴수를 물리쳐라</div>
-    <canvas id="menuart" width="320" height="140" style="width:320px;height:140px;margin-bottom:10px"></canvas>
+    <canvas id="menuart" class="hide" width="320" height="140"></canvas>
+    <div class="mspace"></div>
     <div class="menu">
       <button class="btn main" data-go="select">출 전</button>
       <div class="row"><button class="btn" data-go="shop">강화</button><button class="btn" data-go="rank">랭킹</button></div>
       <div class="row"><button class="btn" data-go="mission">임무·출석<span class="badge hide" id="bdg-mis"></span></button><button class="btn" data-go="ach">업적<span class="badge hide" id="bdg-ach"></span></button></div>
       <div class="row"><button class="btn ghost" data-go="codex">비급 도감</button><button class="btn ghost" data-go="settings">설정</button></div>
       <div id="loginhint" class="lhint hide"></div>
-      <div class="small" style="opacity:.45;margin-top:6px">v3.6</div>
+      <div class="small" style="opacity:.45;margin-top:6px">v3.9</div>
     </div>
-    <div style="margin-top:auto;padding-top:16px" class="coins"><i></i><span class="goldv">0</span></div>
+    <div style="padding-top:12px" class="coins"><i></i><span class="goldv">0</span></div>
   </section>
 
   <!-- 출전 준비 -->
@@ -206,6 +236,9 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
     <div class="lbl">챕터</div>
     <div class="seg" id="difftabs"><button data-d="n">보통</button><button data-d="h" class="h">어려움</button></div>
     <div class="chs" id="chs"></div>
+    <div id="gearpanel" class="hide"><div class="gh"><b>장비 · 백귀야행 전용</b><small>쓰러지면 입고 간 장비를 잃어요</small></div>
+      <div class="gslots" id="gslots"></div><div class="gsum" id="gsum"></div>
+      <button class="btn" id="gbagbtn" style="width:100%;margin-top:8px;padding:9px">장비함</button></div>
     <div style="height:14px"></div>
     <button class="btn main" id="gobtn" style="width:100%;max-width:340px">퇴마 시작</button>
     <div class="note">조작: 화면 아무 곳이나 누르고 끌기 (PC는 WASD·방향키) · 공격은 자동</div>
@@ -238,6 +271,7 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
       <button class="btn tg" id="bgmbtn"><span>배경음</span><i class="sw"></i></button>
       <button class="btn tg" id="vibbtn"><span>진동</span><i class="sw"></i></button>
       <button class="btn tg" id="numbtn"><span>피해 숫자</span><i class="sw"></i></button>
+      <button class="btn tg" id="shkbtn"><span>화면 흔들림</span><i class="sw"></i></button>
       <button class="btn tg" id="qbtn"><span>저화질 모드</span><i class="sw"></i></button>
       <button class="btn" id="cloudbtn">클라우드 저장</button><div class="small" id="cloudinfo" style="text-align:center;margin:-4px 0 4px"></div>
       <button class="btn gold" id="adfree">광고 제거 · $1.99 (출시 후)</button>
@@ -291,6 +325,13 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
     <div class="res" id="resgrid"></div>
     <div id="resnotes"></div><div id="resrank" class="note"></div>
     <div class="opts"><button class="btn gold" id="dbl">▶ 광고 보고 금화 2배</button><div class="row"><button class="btn" id="again">다시</button><button class="btn main" id="tomenu">메인으로</button></div></div></div></div>
+  <div id="m-gear" class="modal hide"><div class="mbox"><h3>장비함</h3><div class="sub" id="gbagsub"></div>
+    <div class="ggrid" id="ggrid"></div><div id="gearinfo"></div>
+    <div class="row" style="margin-top:8px"><button class="btn" id="gsell">팔기</button><button class="btn gold" id="gequip">착용</button></div>
+    <button class="btn ghost" id="gclose" style="width:100%;margin-top:6px">닫기</button></div></div>
+  <div id="m-portal" class="modal hide"><div class="mbox"><h3 id="ptitle">포탈</h3><div class="sub" id="psub"></div>
+    <div class="otinfo" id="pinfo2"></div>
+    <div class="opts"><button class="btn gold" id="pdown">아래층으로 내려가기</button><button class="btn main" id="phome">귀환하기 (장비 챙기기)</button><button class="btn ghost" id="pcancel">조금 더 싸우기</button></div></div></div>
   <div id="m-nick" class="modal hide"><div class="mbox"><h3>닉네임</h3><div class="sub">랭킹에 보일 이름</div>
     <input class="nick" id="nickin" maxlength="12"><div class="note" id="nickmsg"></div>
     <div class="row" style="margin-top:10px"><button class="btn" id="nickcancel">취소</button><button class="btn main" id="nicksave">저장</button></div></div></div>
