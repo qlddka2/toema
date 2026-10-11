@@ -163,28 +163,6 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
 .sw::after{content:'';position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#8d849c;transition:left .2s,background .2s}
 .tg.on .sw{background:var(--gold);box-shadow:none}.tg.on .sw::after{left:24px;background:#fff}
 .tg:not(.on) span{opacity:.6}
-
-/* ── v3.8 첫 화면 ── */
-#s-menu{background:#0b0910}
-#menubg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-#s-menu>*:not(#menubg){position:relative;z-index:1}
-.mtop{width:100%;display:flex;justify-content:flex-end;min-height:24px}
-.mtop .coins{background:rgba(20,14,26,.7);border:1px solid rgba(242,193,78,.3);border-radius:20px;padding:4px 12px 4px 8px}
-#s-menu .title{position:relative;max-width:calc(100% - 34px);line-height:1.1;margin:22px 0 4px;font-size:50px;white-space:nowrap;letter-spacing:.02em}
-#s-menu .title .tt{background:linear-gradient(180deg,#fff6e0 30%,#e9c98a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 rgba(0,0,0,.85)) drop-shadow(0 0 16px rgba(208,70,58,.5))}
-.seal{position:absolute;right:-22px;top:-10px;display:flex;align-items:center;justify-content:center;width:30px;height:38px;border:2px solid #e2574a;border-radius:5px;color:#ff6a58;font-size:14px;line-height:1.05;text-align:center;transform:rotate(-8deg);background:rgba(120,20,16,.35);font-family:serif;font-weight:900;text-shadow:none}
-#s-menu .tag{margin-bottom:6px;color:#c9bfd4;letter-spacing:.02em}
-.nextch{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;max-width:320px;margin:2px 0 12px;padding:9px 12px;border-radius:12px;background:rgba(18,12,22,.72);border:1px solid rgba(242,193,78,.28);color:var(--ink)}
-.nextch b{font-size:15px}.nextch b em{font-style:normal;color:var(--gold);font-size:12px;margin-right:6px;letter-spacing:.08em}
-.nextch .pow{font-size:12px}
-#s-menu .btn.main{position:relative;overflow:hidden;font-family:"Song Myung",serif;font-size:24px;letter-spacing:.2em;padding:14px;border:1.5px solid #f2c14e;background:linear-gradient(180deg,#d9483b,#a52a20 60%,#8a1f18);box-shadow:0 4px 0 #4f120e,0 0 22px rgba(226,87,74,.45),inset 0 0 0 3px rgba(0,0,0,.18)}
-#s-menu .btn.main::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,240,200,.35),transparent);animation:shine 3.2s ease-in-out infinite}
-@keyframes shine{0%,55%{left:-60%}100%{left:130%}}
-.btn.mb{position:relative;background:linear-gradient(180deg,rgba(48,38,58,.92),rgba(32,26,40,.92));border:1px solid rgba(242,193,78,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);font-size:16px;padding:13px 10px}
-.btn.mb.ghost{background:rgba(20,16,26,.6)}
-.btn.mb img{width:28px;height:28px;margin:-4px 2px -4px -4px}
-.badge.up{background:var(--gold);color:#2a1b06;font-size:11px}
-.lvhint{display:block;margin-top:6px;color:var(--gold);font-size:13px;font-weight:700}
 </style>
 </head>
 <body>
@@ -205,20 +183,18 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
 
   <!-- 메인 -->
   <section id="s-menu" class="scr">
-    <canvas id="menubg"></canvas>
-    <div class="mtop"><span class="coins"><i></i><span class="goldv">0</span></span></div>
-    <div class="title"><span class="tt">퇴마 서바이벌</span><span class="seal">退<br>魔</span></div>
+    <div class="title">퇴마 서바이벌</div>
     <div class="tag">좀비가 된 짐승과 신화 속 괴수를 물리쳐라</div>
-    <canvas id="menuart" width="340" height="190" style="width:340px;height:190px"></canvas>
-    <button id="nextch" class="nextch hide"></button>
+    <canvas id="menuart" width="320" height="140" style="width:320px;height:140px;margin-bottom:10px"></canvas>
     <div class="menu">
-      <button class="btn main" id="mainbtn"><span id="mainlbl">출 전</span></button>
-      <div class="row"><button class="btn mb" data-go="shop"><img data-ic="might" alt="">강화<span class="badge up hide" id="bdg-shop">▲</span></button><button class="btn mb" data-go="rank"><img data-ic="r_scale" alt="">랭킹</button></div>
-      <div class="row"><button class="btn mb" data-go="mission"><img data-ic="fortune" alt="">임무·출석<span class="badge hide" id="bdg-mis"></span></button><button class="btn mb" data-go="ach"><img data-ic="r_ledger" alt="">업적<span class="badge hide" id="bdg-ach"></span></button></div>
-      <div class="row"><button class="btn mb ghost" data-go="codex"><img data-ic="talisman" alt="">비급 도감</button><button class="btn mb ghost" data-go="settings"><img data-ic="r_bell" alt="">설정</button></div>
+      <button class="btn main" data-go="select">출 전</button>
+      <div class="row"><button class="btn" data-go="shop">강화</button><button class="btn" data-go="rank">랭킹</button></div>
+      <div class="row"><button class="btn" data-go="mission">임무·출석<span class="badge hide" id="bdg-mis"></span></button><button class="btn" data-go="ach">업적<span class="badge hide" id="bdg-ach"></span></button></div>
+      <div class="row"><button class="btn ghost" data-go="codex">비급 도감</button><button class="btn ghost" data-go="settings">설정</button></div>
       <div id="loginhint" class="lhint hide"></div>
+      <div class="small" style="opacity:.45;margin-top:6px">v3.7.2</div>
     </div>
-    <div class="small" style="opacity:.4;margin-top:auto;padding-top:14px">v3.8 · Difgames</div>
+    <div style="margin-top:auto;padding-top:16px" class="coins"><i></i><span class="goldv">0</span></div>
   </section>
 
   <!-- 출전 준비 -->

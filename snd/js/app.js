@@ -74,9 +74,6 @@ function badges() {
   const a = achReady().length, m = dailyClaimable() + (attendReady() ? 1 : 0);
   $('#bdg-ach').textContent = a || ''; $('#bdg-ach').classList.toggle('hide', !a);
   $('#bdg-mis').textContent = m || ''; $('#bdg-mis').classList.toggle('hide', !m);
-  // 금화로 살 수 있는 영구 강화가 있으면 강화 버튼에 ▲
-  const canUp = !isNew() && Object.keys(D.META).some(k => { const M = D.META[k], lv = SV.meta[k] || 0; return lv < M.max && SV.gold >= M.cost[lv]; });
-  $('#bdg-shop').classList.toggle('hide', !canUp);
 }
 
 /* ───── 화면 전환 ───── */
@@ -89,72 +86,14 @@ function go(name) {
 }
 $$('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
 
-/* ───── 첫 화면 (v3.8) ───── */
-const isNew = () => !(SV.stats.runs > 0);
-// 다음 도전: 아직 못 깬 가장 앞 장 (다 깼으면 어려움 → 백귀야행)
-function nextGoal() {
-  for (let c = 1; c <= 5; c++) if (!SV.clear[c]) return { ch: c, hard: false };
-  for (let c = 1; c <= 5; c++) if (!(SV.hclear || {})[c]) return { ch: c, hard: true };
-  return { ch: 6, hard: false };
-}
-const finalBossOf = ch => ch === 6 ? 'yeomra' : D.CHAPTERS[ch - 1].events.filter(e => e[1] === 'boss').pop()[2];
 function renderMenu() {
-  const c = $('#menuart'), dpr = Math.min(2, window.devicePixelRatio || 1); c.width = 340 * dpr; c.height = 190 * dpr;
-  const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, 340, 190);
-  const g = nextGoal(), boss = finalBossOf(g.ch);
-  // 뒤: 다음에 쓰러뜨릴 우두머리 (어둡게, 붉은 기운) / 앞: 지금 고른 주인공
-  x.save(); x.shadowColor = 'rgba(226,60,40,.85)'; x.shadowBlur = 26; x.globalAlpha = 0.92;
-  const bp = A.bossPortrait(boss, 190); x.drawImage(bp, 150, -6, 190, 190); x.restore();
-  x.save(); x.globalCompositeOperation = 'source-atop'; x.fillStyle = 'rgba(25,6,18,.35)'; x.fillRect(0, 0, 340, 190); x.restore();
-  const gr = x.createRadialGradient(118, 172, 4, 118, 172, 70); gr.addColorStop(0, 'rgba(242,193,78,.45)'); gr.addColorStop(1, 'rgba(242,193,78,0)'); x.fillStyle = gr; x.fillRect(40, 130, 160, 60);
-  x.drawImage(A.portrait(SV.hero, 150), 44, 30, 150, 150);
-  // 다음 도전 카드
-  const nb = $('#nextch');
-  if (isNew()) { nb.classList.add('hide'); $('#mainlbl').textContent = '첫 출전'; }
-  else {
-    const C0 = g.ch === 6 ? D.ENDLESS : D.CHAPTERS[g.ch - 1];
-    nb.innerHTML = `<b><em>다음 도전</em>${g.ch === 6 ? C0.name : `${g.ch}장 ${C0.name}`}${g.hard ? ' (어려움)' : ''}</b>${g.ch === 6 ? '' : powTag(g.ch, g.hard)}`;
-    nb.classList.remove('hide'); $('#mainlbl').textContent = '출 전';
-    nb.onclick = () => { SND.play('click'); SV.ch = g.ch; SV.hard = g.hard; save(); go('select'); };
-  }
-  $$('#s-menu img[data-ic]').forEach(im => { im.src = A.iconURL(im.dataset.ic, 52); });
+  const c = $('#menuart'), dpr = Math.min(2, window.devicePixelRatio || 1); c.width = 320 * dpr; c.height = 140 * dpr;
+  const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, 320, 140);
+  const put = (cv, cx, cy, s) => x.drawImage(cv, cx - s / 2, cy - s / 2, s, s);
+  put(A.bossPortrait('fox', 140), 160, 62, 140);
+  put(A.portrait('daesung', 92), 66, 88, 92); put(A.portrait('uchi', 92), 254, 88, 92);
   badges(); loginHint(); if (RK.state().user) pullCloud();
-  menuBg();
-  // 제목 길이(언어)에 맞춰 크기 조절
-  const tt = $('#s-menu .tt'); if (tt) { const n = tt.textContent.length; tt.parentNode.style.fontSize = n > 14 ? '34px' : n > 8 ? '40px' : ''; tt.parentNode.style.whiteSpace = n > 14 ? 'normal' : ''; }
-  if (attendReady() && !isNew()) setTimeout(() => { if (!$('#s-menu').classList.contains('hide')) openAttend(); }, 400);
-}
-// 처음 하는 사람: 고르는 화면 없이 대성으로 1장 바로 시작
-$('#mainbtn').onclick = () => { SND.play('click'); if (isNew()) { SV.hero = 'daesung'; SV.ch = 1; SV.hard = false; save(); startRun(); } else go('select'); };
-/* 첫 화면 배경: 밤 땅 + 달빛 + 떠오르는 도깨비불 (첫 화면이 보일 때만 움직임) */
-let mbgOn = false; const MBG = [];
-function menuBg() {
-  if (mbgOn) return; mbgOn = true; const cv = $('#menubg'); let t0 = performance.now(), tile = null;
-  const fr = now => {
-    if ($('#s-menu').classList.contains('hide') || running) { mbgOn = false; return; }
-    const dt = Math.min(0.05, (now - t0) / 1000); t0 = now;
-    const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), w = r.width, h = r.height;
-    if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
-    const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (!tile) { const im = A.img('ground_night'); if (im) tile = x.createPattern(im, 'repeat'); }
-    x.fillStyle = '#0b0910'; x.fillRect(0, 0, w, h);
-    if (tile) { x.save(); x.globalAlpha = 0.5; x.translate(0, (now / 80) % 512); x.scale(0.5, 0.5); x.fillStyle = tile; x.fillRect(0, -1024, w * 2, h * 2 + 2048); x.restore(); }
-    let g = x.createRadialGradient(w * 0.13, h * 0.05, 6, w * 0.13, h * 0.05, w * 0.9); g.addColorStop(0, 'rgba(255,236,200,.28)'); g.addColorStop(0.08, 'rgba(255,220,170,.12)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, w, h);
-    x.beginPath(); x.arc(w * 0.13, h * 0.05, 18, 0, TAU); x.fillStyle = 'rgba(255,240,215,.85)'; x.fill();
-    g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, 'rgba(11,9,16,.35)'); g.addColorStop(0.45, 'rgba(11,9,16,.55)'); g.addColorStop(1, 'rgba(11,9,16,.92)'); x.fillStyle = g; x.fillRect(0, 0, w, h);
-    // 안개 띠
-    for (let i = 0; i < 3; i++) { const yy = h * (0.35 + i * 0.18), off = ((now / (60 + i * 25)) % (w * 2)) - w; const fg = x.createLinearGradient(0, yy - 40, 0, yy + 40); fg.addColorStop(0, 'rgba(150,140,190,0)'); fg.addColorStop(0.5, 'rgba(150,140,190,.07)'); fg.addColorStop(1, 'rgba(150,140,190,0)'); x.fillStyle = fg; x.fillRect(off, yy - 40, w * 2, 80); x.fillRect(off - w * 2, yy - 40, w * 2, 80); }
-    // 도깨비불
-    while (MBG.length < 26) MBG.push({ x: Math.random() * w, y: h + Math.random() * h * 0.6, v: 14 + Math.random() * 26, s: 1.5 + Math.random() * 2.8, ph: Math.random() * 6, c: Math.random() < 0.75 ? '127,216,255' : '255,170,90' });
-    for (const q of MBG) {
-      q.y -= q.v * dt; q.ph += dt * 2; const xx = q.x + Math.sin(q.ph) * 8, a = Math.min(1, (h - q.y) / 120) * Math.min(1, q.y / (h * 0.3));
-      if (q.y < -20) { q.y = h + 20; q.x = Math.random() * w; }
-      x.beginPath(); x.arc(xx, q.y, q.s * 3.2, 0, TAU); x.fillStyle = `rgba(${q.c},${0.12 * a})`; x.fill();
-      x.beginPath(); x.arc(xx, q.y, q.s, 0, TAU); x.fillStyle = `rgba(${q.c},${0.85 * a})`; x.fill();
-    }
-    requestAnimationFrame(fr);
-  };
-  requestAnimationFrame(fr);
+  if (attendReady()) setTimeout(() => { if (!$('#s-menu').classList.contains('hide')) openAttend(); }, 400);
 }
 
 /* ───── 출석 ───── */
@@ -471,7 +410,7 @@ function input() {
 function startRun() {
   SND.unlock();
   for (const s of SCR) $('#s-' + s).classList.add('hide');
-  S = C.newRun({ hero: SV.hero, chapter: SV.ch, hard: SV.hard, meta: Object.assign({}, SV.meta), hlv: (SV.hlv || {})[SV.hero] || 1, viewR: 420, assist: (SV.stats.runs || 0) < 2 && SV.ch === 1 && !SV.hard });   // 처음 두 판은 1장을 조금 쉽게
+  S = C.newRun({ hero: SV.hero, chapter: SV.ch, hard: SV.hard, meta: Object.assign({}, SV.meta), hlv: (SV.hlv || {})[SV.hero] || 1, viewR: 420 });
   S.revivable = true; S.goldDoubled = false;
   $('#hud').classList.remove('hide'); $('#bossbar').classList.add('hide');
   running = true; last = performance.now(); paused = false; slotSig = '';
@@ -539,7 +478,7 @@ function events() {
     else if (e.k === 'warn') toast(e.txt);
     else if (e.k === 'rage') toast(e.name + '이(가) 분노했다!');
     else if (e.k === 'evo') { SND.play('evo'); toast(D.WEAPONS[e.id].evo.name + ' 각성!'); }
-    else if (e.k === 'boss') { if (e.id && !(SV.bseen || {})[e.id]) { SV.bseen = Object.assign({}, SV.bseen, { [e.id]: 1 }); persist(); } SND.play('boss'); vib([60, 40, 60]); kick(9); flashScr(0.15, '255,60,40'); banner(e.name, S.assist && !S.bossHint ? (S.bossHint = 1, '빨간 표시가 뜨면 피하세요 · 결계 밖으로는 못 나가요') : e.final ? '최종 우두머리 · 결계에 갇혔다!' : '우두머리 출현 · 결계에 갇혔다!'); $('#bossname').textContent = e.name; $('#bossbar').classList.remove('hide'); SND.music('boss'); }
+    else if (e.k === 'boss') { if (e.id && !(SV.bseen || {})[e.id]) { SV.bseen = Object.assign({}, SV.bseen, { [e.id]: 1 }); persist(); } SND.play('boss'); vib([60, 40, 60]); kick(9); flashScr(0.15, '255,60,40'); banner(e.name, e.final ? '최종 우두머리 · 결계에 갇혔다!' : '우두머리 출현 · 결계에 갇혔다!'); $('#bossname').textContent = e.name; $('#bossbar').classList.remove('hide'); SND.music('boss'); }
     else if (e.k === 'bossdown' || e.k === 'clear') { FEEL.slow = 0.9; kick(14); flashScr(0.55); }
     if (e.k === 'bossdown' && e.ot) { toast(e.name + ' 퇴치!'); $('#bossbar').classList.add('hide'); SND.music(fieldMusic()); }
     else if (e.k === 'bossdown') { toast(e.name + ' 퇴치! 10:00에 최종 우두머리가 나타나요'); $('#bossbar').classList.add('hide'); SND.music(fieldMusic()); }
@@ -579,8 +518,6 @@ function openLevel(reroll) {
   $('#lvtitle').textContent = uni ? '합격기!' : jin ? '진(眞) 각성!' : evo ? '무기 각성!' : chest ? '보물 상자!' : '레벨 업!';
   $('#lvsub').textContent = uni ? '두 비급이 하나로 합쳐진다 · 무기 칸 하나가 비어요' : jin ? `${D.HEROES[S.heroId].name}만이 다다를 수 있는 경지` : evo ? '비급이 완성되었다' : chest ? `상자에서 하나를 고르세요${S.chests > 1 ? ` (${S.chests}개 남음)` : ''}` : `Lv ${S.lv - S.pendingLv + 1} · 하나를 고르세요`;
   $('#m-lvl .mbox').classList.toggle('evo', evo);
-  // 처음 하는 사람에게만: 고르는 법 안내 (첫 판 처음 두 번, 첫 상자 한 번)
-  if (S.assist && !evo) { const k = chest ? 'hc' : 'hl'; S.hintN = S.hintN || {}; if ((S.hintN[k] || 0) < (chest ? 1 : 2)) { S.hintN[k] = (S.hintN[k] || 0) + 1; $('#lvsub').insertAdjacentHTML('beforeend', `<span class="lvhint">${chest ? '상자를 열 때마다 하나를 더 골라요' : '무기는 저절로 공격해요 · 마음에 드는 것 하나를 골라요'}</span>`); } }
   const box = $('#opts'); box.innerHTML = '';
   for (const o of ops) {
     const big = o.kind === 'evo' || o.kind === 'jin' || o.kind === 'union';

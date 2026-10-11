@@ -35,7 +35,7 @@ if (process.env.ONLYNEW === '1') for (const k of ['talisman','staff','thunder','
 function choose(S) { const cs = C.choices(S, C.optCount(S)); if (cs[0].kind === 'evo' || cs[0].kind === 'jin' || cs[0].kind === 'union') return C.pick(S, cs[0]); const sv = o => o.kind === 'w' ? PRI.w[o.id] + 1 + (SETS && o.set && o.lv === 1 && o.set.have >= 2 ? 3 : 0) : PRI.p[o.id] || 0; cs.sort((a, b) => sv(b) - sv(a)); C.pick(S, cs[0]); }
 
 function run(hero, ch, meta, seed, revive) {
-  const S = C.newRun({ hero, chapter: ch, meta, seed, viewR: 420, hard: HARD, hlv: +(process.env.HLV || 1), weekly: process.env.WK, assist: process.env.ASSIST === '1' });
+  const S = C.newRun({ hero, chapter: ch, meta, seed, viewR: 420, hard: HARD, hlv: +(process.env.HLV || 1), weekly: process.env.WK });
   const dt = 1 / 30; let it = 0, cur = { x: 0, y: 0 }; const rnd = C.rng(seed * 7 + 1);
   while (it++ < 30 * 60 * 45) {
     if (S.relicAsk) C.relicPick(S, S.relicOpts[0]);

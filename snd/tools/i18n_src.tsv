@@ -845,9 +845,3 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 저승의 심판관	Judge of the Underworld	冥府の裁判官	冥府的审判者
 우두머리	Bosses	ボス	首领
 화면 흔들림	Screen shake	画面の揺れ	屏幕震动
-## ── v3.8 첫 화면·첫 판 안내 ──
-첫 출전	First Battle	初出陣	首次出战
-다음 도전	NEXT	次の挑戦	下一个挑战
-무기는 저절로 공격해요 · 마음에 드는 것 하나를 골라요	Weapons attack on their own · Pick the one you like	武器は自動で攻撃します・好きなものを1つ選ぼう	武器会自动攻击·选一个你喜欢的
-상자를 열 때마다 하나를 더 골라요	Each chest lets you pick one more	宝箱を開けるたびにもう1つ選べます	每开一个宝箱就能再选一个
-빨간 표시가 뜨면 피하세요 · 결계 밖으로는 못 나가요	Dodge the red markers · You can't leave the barrier	赤い表示が出たら避けよう・結界の外には出られません	看到红色标记就躲开·无法离开结界

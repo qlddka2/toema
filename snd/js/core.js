@@ -38,8 +38,6 @@ function newRun(o) {
     spawnAcc: 0, evIdx: 0, boss: null, arena: null, midDone: false, bossT0: 0, bossT: 0, stashXp: 0, uid: 1, dlog: {},
     bosses: 0, evolved: [], unions: [], mn: [], cursed: [], maxRelic: D.MAX_RELIC, drainB: 0,
   };
-  // 처음 두 판(1장 보통) 보정: 적 체력 75%·피해 60%·우두머리 체력 80%
-  if (o.assist) { S.assist = true; S.mod.hp *= 0.75; S.mod.dmg *= 0.6; S.mod.bossHp *= 0.8; }
   const W = S.wk;   // 주간 조건
   if (W === 'rush') S.mod.espd = 1.25;
   if (W === 'hunger') S.goldBase *= 1.3;
