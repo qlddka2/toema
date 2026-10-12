@@ -1,7 +1,7 @@
 /* 퇴마 서바이벌 — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
 (function (G) {
 const D = {};
-D.VERSION = '4.1.0';
+D.VERSION = '4.1.1';
 
 /* ───── 주인공 ─────
    unlock: 해금 조건 (없으면 처음부터) */
@@ -554,6 +554,7 @@ D.ORB_MAX = 10;   // 보옥은 종류마다 10개까지 (끝없이 강해지는 
   ];
 })();
 D.ENDLESS_XP = +(typeof process !== 'undefined' && process.env && process.env.EXP || 0.55);   // v4.0 백귀야행 경험치 배율 (무기가 5분 만에 다 크지 않게)
+D.ENDLESS_GATE = { evo: +(typeof process !== 'undefined' && process.env && process.env.GEVO || 420), union: 900, jin: 900 };   // v4.1.1 백귀야행: 첫 각성 7분, 합격기·진각성 15분 이후
 D.FLOOR_SCORE = [0, 3000, 8000, 15000];   // 도달한 층 보너스 (서버 공식과 같음)
 D.escore = (t, kills, bosses, floor = 1) => 10 * t + kills + 2000 * bosses + (D.FLOOR_SCORE[Math.max(1, Math.min(4, floor)) - 1] || 0);
 

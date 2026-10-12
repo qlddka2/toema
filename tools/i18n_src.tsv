@@ -541,7 +541,6 @@ Google 로그인	Google sign-in	Googleログイン	Google登录
 행렬이 거세진다 ({n}단계)	The parade grows fiercer (stage {0})	行列が激しくなる（{0}段階）	队列愈发猛烈（第{0}阶段）
 백귀야행이 이어진다	The Night Parade continues	百鬼夜行は続く	百鬼夜行仍在继续
 불사초가 다시 일으켜 세웠다	The Undying Herb raised you up	不死草が再び立ち上がらせた	不死草让你重新站起
-환생	Rebirth	転生	转生
 다시 일어섰다	You rose again	再び立ち上がった	重新站起来了
 퇴마 성공!	Exorcism complete!	退魔成功！	驱魔成功！
 퇴마 성공	Exorcism complete	退魔成功	驱魔成功
@@ -655,10 +654,6 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 치명타 확률 +{n}%, 회복량 +{n}%	Crit chance +{0}%, Healing +{1}%	会心率 +{0}%、回復量 +{1}%	暴击率 +{0}%，回复量 +{1}%
 빙결 시간 +{n}%, 피해 +{n}%	Freeze duration +{0}%, Damage +{1}%	氷結時間 +{0}%、ダメージ +{1}%	冰冻时间 +{0}%，伤害 +{1}%
 튕김 +{n}, 피해 +{n}%	Bounce +{0}, Damage +{1}%	跳弾 +{0}、ダメージ +{1}%	弹射 +{0}，伤害 +{1}%
-누적 처치 {n}	Total kills {0}	累計撃破 {0}	累计击杀 {0}
-{n}장 어려움 클리어	Clear Ch.{0} on Hard	第{0}章 ハードクリア	通关第{0}章困难
-{n}판 플레이	Play {0} runs	{0}回プレイ	游玩{0}局
-무기 {n}종 진화	Evolve {0} weapons	武器{0}種を進化	进化{0}种武器
 환도	Hwando Saber	環刀	环刀
 칼을 던지면 멀리 날아갔다가 되돌아오며 두 번 베어요	A thrown saber flies out and returns, cutting twice	投げた刀が遠くまで飛んで戻り、二度斬る	掷出的刀飞远后折返，斩击两次
 칼 +{n}	Blades +{0}	刀 +{0}	刀 +{0}
@@ -672,7 +667,6 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 방망이 3개가 8번씩 튕기고, 쓰러뜨린 적이 금화를 떨어뜨려요	3 clubs bounce 8 times each, and defeated enemies drop gold	棍棒3本が8回ずつ跳ね、倒した敵が金貨を落とす	3根棒槌各弹射8次，被打倒的敌人掉落金币
 여우구슬	Fox Bead	狐玉	狐珠
 구슬이 적을 쫓아가 기운을 빨아들여 체력을 채워요	The bead chases enemies and drains their life to heal you	玉が敵を追って気を吸い取り、体力を回復する	珠子追击敌人，吸取其气恢复生命
-구슬 +{n}	Beads +{0}	玉 +{0}	珠子 +{0}
 회복 증가	more healing	回復増加	回复增加
 구미호의 진주	Nine-Tailed Pearl	九尾の真珠	九尾的珍珠
 진주 5개가 적을 꿰뚫으며 체력을 크게 빨아들여요	5 pearls pierce enemies and drain a lot of life	真珠5つが敵を貫き、体力を大きく吸い取る	5颗珍珠贯穿敌人，大量吸取生命
@@ -752,7 +746,6 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 금화 +{n}%, 적이 보물 상자를 떨어뜨리기도 해요	Gold +{0}%, and enemies sometimes drop chests	金貨 +{0}%、敵が宝箱を落とすことも	金币 +{0}%，敌人有时会掉落宝箱
 받는 피해 -{n}%	Damage taken -{0}%	被ダメージ -{0}%	受到伤害 -{0}%
 귀물	Relics of Spirits	鬼物	鬼物
-적을 처치할 때마다 체력 +{n}	+{0} HP per kill	敵を倒すたびに体力 +{0}	每击杀一名敌人生命 +{0}
 피해 +{n}%, 공격 속도 +{n}%	Damage +{0}%, Attack speed +{1}%	ダメージ +{0}%、攻撃速度 +{1}%	伤害 +{0}%，攻击速度 +{1}%
 칠성검	Seven Star Sword	七星剣	七星剑
 치명타가 터지면 가끔 그 자리에 벼락이 떨어져요	Critical hits sometimes call down lightning on the spot	会心が出ると、時々その場に落雷する	暴击时有时会在该处落下雷霆
@@ -779,7 +772,6 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 도깨비 장터	Goblin Market	トッケビ市場	鬼怪集市
 보물 상자가 두 배로 나오지만 레벨업 선택지가 {n}개뿐	Double chests, but only {0} level-up choices	宝箱が2倍出るが、レベルアップの選択肢は{0}つだけ	宝箱翻倍，但升级选项只有{0}个
 비급 대가	Grandmaster of Secrets	秘伝の大家	秘籍大师
-무기 {n}종 진화	Evolve {0} weapons	武器{0}種を進化	进化{0}种武器
 합격	Combined Arts	合撃	合击
 합격기를 처음 완성	Complete your first combo art	合撃技を初めて完成	首次完成合击技
 합격의 달인	Master of Combos	合撃の達人	合击达人
@@ -800,7 +792,6 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 바람	Wind	風	风
 생기	Vitality	生気	生气
 신속	Haste	迅速	迅速
-기력	Might	気力	气力
 백귀야행 (어려움)	Night Parade (Hard)	百鬼夜行（ハード）	百鬼夜行（困难）
 보통 3장을 클리어하면 열려요	Unlocks after clearing Normal Ch.3	ノーマル第3章クリアで解放	通关普通第3章后解锁
 어려움 3장을 클리어하면 열려요	Unlocks after clearing Hard Ch.3	ハード第3章クリアで解放	通关困难第3章后解锁
@@ -877,7 +868,6 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 가죽 갑옷	Leather Armor	革の鎧	皮甲
 범 무늬 방패	Tiger Shield	虎模様の盾	虎纹盾
 신장 갑주	Guardian Armor	神将の甲冑	神将甲胄
-바람 신발	Wind Shoes	風の靴	疾风鞋
 날개 장화	Winged Boots	翼のブーツ	羽翼长靴
 나무 염주	Wooden Beads	木の数珠	木念珠
 수호 구슬	Guardian Orb	守護の珠	守护珠
@@ -892,11 +882,7 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 전설 등급이면	At Legend grade	伝説等級なら	传说等级时
 받는 피해 −{n}%	Damage taken −{0}%	被ダメージ −{0}%	受到伤害 −{0}%
 주는 피해 +{n}%	Damage dealt +{0}%	与ダメージ +{0}%	造成伤害 +{0}%
-구슬 흡수 범위 +{n}%	Orb pickup range +{0}%	吸収範囲 +{0}%	吸收范围 +{0}%
-초당 체력 회복 +{n}	HP regen +{0}/s	毎秒HP回復 +{0}	每秒回复生命 +{0}
 처치할 때 체력 +{n}	HP +{0} per kill	撃破時HP +{0}	击杀时生命 +{0}
-체력 +{n}%	HP +{0}%	HP +{0}%	生命 +{0}%
-피해 +{n}%	Damage +{0}%	ダメージ +{0}%	伤害 +{0}%
 이동 +{n}%	Move +{0}%	移動 +{0}%	移动 +{0}%
 치명 +{n}%	Crit +{0}%	会心 +{0}%	暴击 +{0}%
 회복 +{n}/초	Regen +{0}/s	回復 +{0}/秒	回复 +{0}/秒
@@ -976,3 +962,19 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 4층 요괴 행렬	4-floor demon parade	4層の妖怪行列	4层妖怪行列
 포탈로 귀환하면 장비 획득	return via portal to keep gear	ポータルで帰還すると装備獲得	经传送门归还可获得装备
 어려움 주간 랭킹	Hard weekly ranking	ハード週間ランキング	困难每周排行
+## ── v4.0 ──
+넉백 +50%, 치명타 피해 +50%, 공격 속도 +6%	Knockback +50%, Crit damage +50%, Attack speed +6%	ノックバック +50%、会心ダメージ +50%、攻撃速度 +6%	击退 +50%，暴击伤害 +50%，攻击速度 +6%
+쓰러지면 체력 100%로 일어나요. 우두머리를 3마리 쓰러뜨리면 다시 채워져요	When you fall, rise with 100% HP. Recharges after defeating 3 bosses	倒れるとHP100%で復活。ボスを3体倒すと再び使えます	倒下时以100%生命复活。击败3个首领后重新充能
+범가죽 두루마기	Tiger-hide Robe	虎皮の衣	虎皮长袍
+바람 미투리	Wind Sandals	風のわらじ	疾风麻鞋
+축지 짚신	Shrinking-Earth Straw Shoes	縮地のわらじ	缩地草鞋
+그림자 버선	Shadow Socks	影の足袋	影子布袜
+청동 방울	Bronze Bell	青銅の鈴	青铜铃
+피해를 피할 확률 {n}%	{0}% chance to dodge damage	ダメージ回避率 {0}%	{0}%几率闪避伤害
+회피 {n}%	Dodge {0}%	回避 {0}%	闪避 {0}%
+회피	Dodge	回避	闪避
+다른 앱 음악이 재생 중이라 배경음을 껐어요 (효과음은 그대로)	Another app is playing music, so the BGM is off (sound effects stay on)	他のアプリで音楽再生中のためBGMをオフにしました（効果音はそのまま）	其他应用正在播放音乐，已关闭背景音乐（音效保留）
+불사초가 다시 피어났다!	The Undying Herb bloomed again!	不死草が再び咲いた！	不死草再次绽放！
+광고 보고 금화 {n}배 (오늘 첫 번째)	Watch ad: ×{0} gold (today's first)	広告を見て金貨{0}倍（本日初回）	看广告金币×{0}（今日首次）
+광고 보고 금화 +{n}% (+{n})	Watch ad: +{0}% gold (+{1})	広告を見て金貨+{0}%（+{1}）	看广告金币+{0}%（+{1}）
+금화 +{n} 받음	Got +{0} gold	金貨 +{0} 獲得	获得金币 +{0}

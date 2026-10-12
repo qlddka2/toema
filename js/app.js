@@ -785,6 +785,32 @@ function banner(a, b) { $('#banner').innerHTML = `<div class="in"><b>${esc(a)}</
 /* ───── 그리기 ───── */
 const PCOL = { shadow: ['#e2d4ff', '#7a46c8'], ghost: ['#f0fffb', '#38d6c0'], curse: ['#f0c8ff', '#9a4ad8'], fire: ['#bfe9ff', '#3fa6ff'], poison: ['#d6ff8a', '#4aa83a'], spike: ['#e6edf2', '#6b7884'], shard: ['#ffffff', '#ffb04a'], ice: ['#ffffff', '#7fc8ff'], fire2: ['#fff1a0', '#ff6a2a'], feather: ['#ffe08a', '#ff5a3a'], water: ['#e0fbff', '#2aa8c8'], bolt: ['#ffffff', '#6aa8ff'], bolt2: ['#ffffff', '#5a8aff'] };
 /* v4.1: 그림 한 장 그리기 (없으면 false → 예전 도형으로) */
+// 근접 베기 이펙트: 실제 판정(반경 f.r, 각도 f.arc ± 여유)과 같은 부채꼴 위에 초승달 스프라이트를 이어 붙인다
+const SLASH_FIT = { fx_slash: [118, 10, 122.6, 1.78], fx_slash2: [126, 22, 109, 1.83] };   // 원 중심 x,y · 반지름 · 중심각(rad) (192px 기준)
+function drawSwing(x, f, sx, sy) {
+  const k = 1 - f.t / f.t0, full = f.arc >= 6.2, span = full ? Math.PI * 2 : f.arc + 0.36;
+  const prog = full ? 1 : Math.min(1, 0.25 + k * 2.2), fade = 1 - Math.max(0, (k - 0.45) / 0.55);
+  const R = f.r * K, tw = f.c === 'twin', key = tw ? 'fx_slash2' : 'fx_slash', im = A.img(key);
+  const col = tw ? (f.evo ? '170,225,255' : '140,190,255') : (f.evo ? '255,226,120' : '255,196,90');
+  const hi = f.a + span / 2, lo = hi - span * prog, rot0 = full ? k * 2.4 : 0;
+  x.save(); x.globalCompositeOperation = 'lighter';
+  // 판정 범위 (부채꼴) 옅게
+  const g = x.createRadialGradient(sx, sy, R * 0.2, sx, sy, R);
+  g.addColorStop(0, `rgba(${col},0)`); g.addColorStop(0.7, `rgba(${col},${0.07 * fade})`); g.addColorStop(1, `rgba(${col},${0.22 * fade})`);
+  x.beginPath(); if (full) x.arc(sx, sy, R, 0, Math.PI * 2); else { x.moveTo(sx, sy); x.arc(sx, sy, R, lo, hi); x.closePath(); } x.fillStyle = g; x.fill();
+  // 정확한 바깥 테두리
+  x.beginPath(); if (full) x.arc(sx, sy, R, 0, Math.PI * 2); else x.arc(sx, sy, R, lo, hi); x.strokeStyle = `rgba(${col},${0.55 * fade})`; x.lineWidth = 2 * K; x.stroke();
+  if (im) {
+    const [cx, cy, cr, mid] = SLASH_FIT[key], s = R * 0.97 / cr, n = Math.max(1, Math.ceil(span / 1.65));
+    x.beginPath(); if (full) x.rect(sx - R * 2, sy - R * 2, R * 4, R * 4); else { x.moveTo(sx, sy); x.arc(sx, sy, R * 1.4, lo, hi); x.closePath(); } x.clip();
+    x.globalAlpha = Math.max(0, fade);
+    for (let i = 0; i < n; i++) {
+      const phi = hi - span * (i + 0.5) / n + rot0, rho = phi - mid;
+      x.save(); x.translate(sx, sy); x.rotate(rho); x.scale(s, s); x.drawImage(im, -cx, -cy, 192, 192); x.restore();
+    }
+  }
+  x.restore();
+}
 function spr(k, sx, sy, w, h, a, alpha, add) {
   const im = A.img(k); if (!im) return false; const x = ctx;
   x.save(); if (add) x.globalCompositeOperation = 'lighter'; if (alpha != null) x.globalAlpha = Math.max(0, Math.min(1, alpha));
@@ -927,7 +953,7 @@ function render() {
       const SPK = { tal: ['fx_tal', 30, 15], arrow: ['fx_arrow', 38, 10], knife: ['fx_knife', 28, 9], rocket: ['fx_rocket', 40, 14] }[q.k];
       if (SPK && spr(SPK[0], sx, sy, SPK[1] * K * (q.evo ? 1.2 : 1), SPK[2] * K * (q.evo ? 1.2 : 1), q.a)) { if (q.evo) spr('fx_orb', sx, sy, 22 * K, 22 * K, 0, 0.3, true); continue; }
       if ((q.k === 'soul' || q.k === 'fox') && spr(q.fox || q.k === 'fox' ? 'fx_fox' : 'fx_soul', sx, sy - 4 * K, 24 * K, 24 * K, 0, 1)) continue;
-      if (q.k === 'wind' && spr('fx_wind', sx, sy, q.w * 1.3 * K, q.w * 0.75 * K, q.a - 0.37, Math.min(1, q.life * 2), true)) continue;
+      if (q.k === 'wind' && spr('fx_wind', sx, sy, q.w * 0.9 * K, q.w * 2.0 * K, q.a, Math.min(1, q.life * 2), true)) continue;
       if (q.k === 'club' && spr('fx_club', sx, sy, 34 * K, 34 * K, q.rot || 0)) continue;
       if (q.k === 'refl' && spr(EBK[q.col] || 'eb_fire', sx, sy, 22 * K, 22 * K, q.a, 1, true)) continue;
     }
@@ -966,9 +992,7 @@ function render() {
     }
     const sx = wx(f.x), sy = wy(f.y); if (!vis(sx, sy, 300)) continue;
     if (f.k === 'num') { if (!SV.nums && !f.big) continue; const pz = f.crit || f.big ? 1 + Math.max(0, f.t - 0.45) * 5 : 1; x.font = `900 ${(f.big ? 15 : f.crit ? 14 : 12) * K * pz}px sans-serif`; x.globalAlpha = Math.min(1, f.t * 3); x.lineWidth = 3; x.strokeStyle = '#000'; const fv = typeof f.v === 'string' && window.I18N ? I18N.t(f.v) : f.v; x.strokeText(fv, sx, sy); x.fillStyle = typeof f.v === 'string' ? '#bfe6ff' : f.crit ? '#ff9a4a' : f.big ? '#ffd36b' : '#fff'; x.fillText(fv, sx, sy); x.globalAlpha = 1; }
-    else if (f.k === 'swing' && A.img('fx_slash')) { const k = 1 - f.t / f.t0, sc = 0.75 + 0.35 * k, ox = Math.cos(f.a) * f.r * 0.55 * K, oy = Math.sin(f.a) * f.r * 0.55 * K;
-      spr(f.c === 'twin' ? 'fx_slash2' : 'fx_slash', sx + ox, sy + oy, f.r * 1.5 * K * sc * (f.evo ? 1.15 : 1), f.r * 0.85 * K * sc * (f.evo ? 1.15 : 1), f.a - 0.4 + (k - 0.5) * 0.5, 1 - k * 0.7, true); }
-    else if (f.k === 'swing') { const k = 1 - f.t / f.t0; x.save(); x.globalAlpha = 1 - k * 0.6; const span = f.arc * Math.min(1, k * 1.6); x.beginPath(); x.arc(sx, sy, f.r * K, f.a - f.arc / 2, f.a - f.arc / 2 + span); x.strokeStyle = f.c === 'twin' ? (f.evo ? 'rgba(200,235,255,.95)' : 'rgba(225,235,245,.9)') : f.evo ? 'rgba(255,236,150,.95)' : 'rgba(255,220,140,.9)'; x.lineWidth = (f.evo ? 13 : 9) * K; x.stroke(); x.beginPath(); x.arc(sx, sy, f.r * 0.7 * K, f.a - f.arc / 2, f.a - f.arc / 2 + span); x.strokeStyle = f.c === 'twin' ? 'rgba(90,140,220,.6)' : 'rgba(210,59,44,.7)'; x.lineWidth = 5 * K; x.stroke(); x.restore(); }
+    else if (f.k === 'swing') drawSwing(x, f, sx, sy);
     else if (f.k === 'bolt' && A.img('fx_bolt')) { const h = 280 * K; spr('fx_bolt', sx, sy - h / 2 + 10 * K, h * 0.42 * (f.evo ? 1.3 : 1), h, 0, f.t * 4, true); spr('fx_orb', sx, sy, f.r * 2.2 * K, f.r * 2.2 * K, f.seed * 6, f.t * 3, true); }
     else if (f.k === 'bolt') { x.save(); x.globalAlpha = f.t * 4; x.beginPath(); let px = sx, py = sy - 260 * K; x.moveTo(px, py); for (let i = 1; i <= 7; i++) { px = sx + (Math.sin(i * 7.3 + f.seed * 20) * 10) * K; py = sy - 260 * K + i * 260 / 7 * K; x.lineTo(px, py); } x.strokeStyle = f.evo ? '#fff' : '#fff6b0'; x.lineWidth = (f.evo ? 6 : 4) * K; x.stroke(); x.strokeStyle = '#ffd34d'; x.lineWidth = 1.5 * K; x.stroke(); x.beginPath(); x.arc(sx, sy, f.r * K, 0, TAU); x.fillStyle = 'rgba(255,240,150,.35)'; x.fill(); x.restore(); }
     else if (f.k === 'chain') { x.save(); x.globalAlpha = Math.min(1, f.t * 5); x.beginPath(); for (let i = 0; i < f.pts.length; i++) { const [a, b] = f.pts[i], px = wx(a) + (i ? (Math.random() - 0.5) * 6 * K : 0), py = wy(b) + (i ? (Math.random() - 0.5) * 6 * K : 0); if (i) { const [a0, b0] = f.pts[i - 1], mx = (wx(a0) + px) / 2 + (Math.random() - 0.5) * 14 * K, my = (wy(b0) + py) / 2 + (Math.random() - 0.5) * 14 * K; x.lineTo(mx, my); x.lineTo(px, py); } else x.moveTo(px, py); } x.strokeStyle = 'rgba(120,180,255,.6)'; x.lineWidth = (f.evo ? 9 : 7) * K; x.stroke(); x.strokeStyle = '#f2f8ff'; x.lineWidth = 2.4 * K; x.stroke(); x.restore(); for (const [a, b] of f.pts) spr('fx_orb', wx(a), wy(b), 26 * K, 26 * K, f.t * 9, Math.min(1, f.t * 5), true); }
@@ -979,7 +1003,7 @@ function render() {
     else if (f.k === 'pop') { x.beginPath(); x.arc(sx, sy, f.r * K * (1.6 - f.t * 2), 0, TAU); x.strokeStyle = f.c; x.globalAlpha = f.t * 3; x.lineWidth = 2 * K; x.stroke(); x.globalAlpha = 1; }
     else if (f.k === 'ring') { x.beginPath(); x.arc(sx, sy, f.r * K * (1.2 - f.t), 0, TAU); x.strokeStyle = f.c; x.globalAlpha = f.t * 2; x.lineWidth = 6 * K; x.stroke(); x.globalAlpha = 1; }
     else if (f.k === 'boom') { x.beginPath(); x.arc(sx, sy, f.r * K * (1.3 - f.t * 1.5), 0, TAU); x.fillStyle = `rgba(127,216,255,${f.t * 1.6})`; x.fill(); }
-    else if (f.k === 'blast' && A.img('fx_boom') && f.c !== 'curse') { const k = Math.max(0, 1 - f.t / 0.4); spr('fx_boom', sx, sy, f.r * 2.4 * K * (0.6 + 0.5 * k), f.r * 2.4 * K * (0.6 + 0.5 * k), f.x * 0.01 + k * 0.8, Math.min(1, f.t * 3), true); }
+    else if (f.k === 'blast' && A.img('fx_boom') && f.c !== 'curse') { const k = Math.max(0, 1 - f.t / 0.4); spr('fx_boom', sx, sy, f.r * 2.2 * K * (0.75 + 0.35 * k), f.r * 2.2 * K * (0.75 + 0.35 * k), f.x * 0.01 + k * 0.8, Math.min(1, f.t * 3), true); }
     else if (f.k === 'blast' && f.c === 'curse' && A.img('fx_curse')) { spr('fx_curse', sx, sy, f.r * 2.2 * K, f.r * 2.2 * K, S.t * 2, Math.min(1, f.t * 3), true); }
     else if (f.k === 'blast') { const c = (PCOL[f.c] || PCOL.fire2)[1]; x.beginPath(); x.arc(sx, sy, f.r * K * (1.2 - f.t), 0, TAU); x.fillStyle = c; x.globalAlpha = f.t * 2; x.fill(); x.globalAlpha = 1; }
     else if (f.k === 'rock') {
@@ -1087,5 +1111,11 @@ setCoin();
 A.loadImages('img/', () => { setCoin(); if (!$('#s-menu').classList.contains('hide')) renderMenu(); if (!$('#s-select').classList.contains('hide')) renderSelect(); });
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !(window.NATIVE && NATIVE.on)) navigator.serviceWorker.register('sw.js').catch(() => {});   // 앱은 파일이 내장돼 있어 필요 없음
 go('menu');
+(() => {   // 버전 표시: data·core·app 중 하나라도 다르면 빨갛게 (일부 파일만 올라간 배포를 바로 알 수 있게)
+  const APP_V = '4.1.1', el = $('#verlab'); if (!el) return;
+  const bad = [['data', D.VERSION], ['core', C.V || '?']].filter(q => q[1] !== APP_V);
+  el.textContent = 'v' + APP_V + (bad.length ? ' ⚠ ' + bad.map(q => q[0] + ' ' + q[1]).join(' · ') : '');
+  if (bad.length) { el.style.color = '#ff8a7a'; el.style.opacity = 1; }
+})();
 window.__toema = { get S() { return S; }, SV: () => SV, go, startRun, cloudOnAuth, pushCloud, pullCloud, resetCloud: () => { cloudUid = null; } };
 })();

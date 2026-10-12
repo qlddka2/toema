@@ -55,4 +55,51 @@ if (!g.includes('signingConfigs')) {
 }
 must(g.includes('signingConfig signingConfigs.release'), '서명 설정 넣기 실패');
 wr('app/build.gradle', g);
+// 5) v4.0: 다른 앱 음악 감지 플러그인 (AudioCheck.otherMusic → AudioManager.isMusicActive)
+//    게임은 오디오 포커스를 요청하지 않음(웹 오디오만 사용) → 다른 앱 음악과 함께 재생됨
+{
+  const { readdirSync, mkdirSync } = await import('node:fs');
+  const findMain = dir => { for (const f of readdirSync(dir, { withFileTypes: true })) { const p = dir + '/' + f.name; if (f.isDirectory()) { const r = findMain(p); if (r) return r; } else if (f.name === 'MainActivity.java') return p; } return null; };
+  const mainPath = findMain(A + 'app/src/main/java');
+  if (!mainPath) console.warn('MainActivity.java 를 못 찾아 AudioCheck 플러그인을 건너뜀');
+  else {
+    const dir = mainPath.replace(/\/MainActivity\.java$/, ''), pkg = (readFileSync(mainPath, 'utf8').match(/package\s+([\w.]+);/) || [])[1];
+    writeFileSync(dir + '/AudioCheckPlugin.java', `package ${pkg};
+
+import android.content.Context;
+import android.media.AudioManager;
+import com.getcapacitor.JSObject;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
+
+@CapacitorPlugin(name = "AudioCheck")
+public class AudioCheckPlugin extends Plugin {
+    @PluginMethod
+    public void otherMusic(PluginCall call) {
+        boolean active = false;
+        try {
+            AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+            active = am != null && am.isMusicActive();
+        } catch (Exception e) { }
+        JSObject r = new JSObject();
+        r.put("active", active);
+        call.resolve(r);
+    }
+}
+`);
+    let ma = readFileSync(mainPath, 'utf8');
+    if (!ma.includes('AudioCheckPlugin')) {
+      ma = ma.replace(/public class MainActivity extends BridgeActivity\s*\{\s*\}/, `public class MainActivity extends BridgeActivity {
+    @Override
+    public void onCreate(android.os.Bundle savedInstanceState) {
+        registerPlugin(AudioCheckPlugin.class);
+        super.onCreate(savedInstanceState);
+    }
+}`);
+      if (ma.includes('AudioCheckPlugin')) writeFileSync(mainPath, ma); else console.warn('MainActivity 모양이 달라 AudioCheck 등록을 건너뜀');
+    }
+  }
+}
 console.log(`patched: v${ver} (${code}), admob ${appId}`);

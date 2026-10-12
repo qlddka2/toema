@@ -96,6 +96,10 @@ N.googleLogout = async function () { const S = P('SocialLogin'); if (S) try { aw
 
 /* ───── 뒤로가기 버튼 ───── */
 N.onBack = f => { const A = P('App'); if (A) A.addListener('backButton', f); };
+/* v4.0: 앱으로 돌아올 때 · 다른 앱 음악(유튜브 뮤직·멜론 등)이 재생 중인지 (안드로이드 AudioManager.isMusicActive) */
+N.onResume = f => { const A = P('App'); if (A) A.addListener('appStateChange', s => { if (s && s.isActive) f(); }); };
+let AC = null;
+N.otherMusic = async () => { if (!on) return false; try { AC = AC || (Cap.registerPlugin ? Cap.registerPlugin('AudioCheck') : P('AudioCheck')); const r = await AC.otherMusic(); return !!(r && r.active); } catch (e) { return false; } };
 N.minimize = () => { const A = P('App'); if (A) (A.minimizeApp ? A.minimizeApp() : A.exitApp()); };
 
 if (on) {

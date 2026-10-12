@@ -33,8 +33,9 @@ function loadFiles(base) {
 function playBuf(buf, bus, loop, vol = 1) { const s = ac.createBufferSource(), g = ac.createGain(); s.buffer = buf; s.loop = !!loop; g.gain.value = vol; s.connect(g).connect(bus); s.start(); return s; }
 /* 첫 터치·클릭·키 입력에서 소리 잠금 해제 (모바일 브라우저 규칙) */
 function unlock() {
+  if (document.hidden) return;
   const a = ctx(); if (!a) return;
-  if (a.state === 'suspended') a.resume();
+  if (a.state !== 'running') { const r = a.resume(); if (r && r.catch) r.catch(() => {}); }
   try { const b = a.createBuffer(1, 1, 22050), s = a.createBufferSource(); s.buffer = b; s.connect(a.destination); s.start(0); } catch (e) {}
 }
 ['pointerdown', 'touchend', 'keydown', 'click'].forEach(ev => window.addEventListener(ev, unlock, { capture: true, passive: true }));
@@ -169,6 +170,7 @@ const degNote = (s, d) => s.root + 12 + GYE[d % 5] + 12 * Math.floor(d / 5);
 function tick() {
   if (!song || !ac) return;
   const s = song, G = s.grid, spb = 60 / s.bpm / (G === 12 ? 3 : 4), b = synthBus;
+  if (nextT < ac.currentTime - 0.5) nextT = ac.currentTime + 0.05;   // 멈췄다 돌아오면 밀린 음을 한꺼번에 몰아 치지 않게
   while (nextT < ac.currentTime + 0.15) {
     const i = step % G, barN = ((step / G) | 0), bi = barN % 4, t = nextT, tr = s.bars[bi], hot = s === SONGS.boss || inten > 0.66, mid = s === SONGS.boss || inten > 0.33;
     // 깔리는 소리 (근음+5도)
@@ -219,7 +221,21 @@ function setOpts(o) {
   Object.assign(opt, o);
   if (ac) { sfxBus.gain.setTargetAtTime(opt.sfx ? 1 : 0, ac.currentTime, 0.05); bgmBus.gain.setTargetAtTime(opt.bgm ? BGM_VOL : 0, ac.currentTime, 0.2); }
 }
-document.addEventListener('visibilitychange', () => { if (!ac) return; if (document.hidden) ac.suspend(); else ac.resume(); });
+/* v4.0: 다른 앱에 다녀오면 소리가 안 나던 문제
+   숨을 때 멈추고, 돌아오면 다시 켬. 0.6초 뒤에도 안 켜져 있으면(안드로이드에서 가끔 그럼) 소리 장치를 새로 만들고 곡을 다시 틂.
+   그래도 막혀 있으면 다음 터치(unlock)에서 켜짐 */
+function rebuild() {
+  const k = songKey; try { if (timer) clearInterval(timer); timer = null; if (bgmSrc) bgmSrc.stop(); } catch (e) {}
+  bgmSrc = null; try { ac && ac.close(); } catch (e) {} ac = null; songKey = null;
+  ctx(); if (k) music(k);
+}
+function wake() {
+  if (!ac || document.hidden) return;
+  if (ac.state !== 'running') { const r = ac.resume(); if (r && r.catch) r.catch(() => {}); }
+  setTimeout(() => { if (ac && !document.hidden && ac.state !== 'running') rebuild(); }, 600);
+}
+document.addEventListener('visibilitychange', () => { if (!ac) return; if (document.hidden) { try { ac.suspend(); } catch (e) {} } else wake(); });
+window.addEventListener('focus', wake); window.addEventListener('pageshow', wake);
 
-window.AUDIO = { play, unlock, music, intensity, setOpts, loadFiles, KEYS: () => Object.keys(P), _dbg: () => ({ ac, master }) };
+window.AUDIO = { play, unlock, wake, music, intensity, setOpts, opts: () => Object.assign({}, opt), loadFiles, KEYS: () => Object.keys(P), _dbg: () => ({ ac, master }) };
 })();

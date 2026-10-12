@@ -50,7 +50,7 @@ function run(hero, ch, meta, seed, revive) {
     if (S.over) break;
     if (!HUMAN || it % HUMAN.every === 0) { cur = bot(S); if (HUMAN) { const a = Math.atan2(cur.y, cur.x) + (rnd() - 0.5) * HUMAN.err; const m = Math.hypot(cur.x, cur.y); cur = { x: Math.cos(a) * m, y: Math.sin(a) * m }; } }
     const hp0 = S.p.hp, dl0 = Object.assign({}, S.dlog), hadB = S.boss;
-    C.step(S, dt, cur);
+    C.step(S, dt, cur); if (CH === 6) { S.lvAt = S.lvAt || {}; for (const m of [5, 10, 20, 30]) if (S.t >= m * 60 && S.lvAt[m] == null) S.lvAt[m] = S.lv; }
     if (process.env.BLOG) {
       if (S.boss && S.boss !== hadB) S.bl = { id: S.boss.type, t: S.t, hp: Math.round(hp0 / S.p.maxhp * 100), d0: Math.round(Math.hypot(S.boss.x - S.p.x, S.boss.y - S.p.y)), lost: 0, src: {}, minD: 1e9 };
       if (S.bl && S.t - S.bl.t < 3 && S.boss) { const L = S.bl; L.minD = Math.min(L.minD, Math.round(Math.hypot(S.boss.x - S.p.x, S.boss.y - S.p.y) - S.boss.r - S.p.r)); for (const k in S.dlog) { const v = S.dlog[k] - (dl0[k] || 0); if (v > 0) { L.src[k] = (L.src[k] || 0) + v; L.lost += v; } } }
@@ -58,7 +58,7 @@ function run(hero, ch, meta, seed, revive) {
       if (S.over === 'dead' && S.bl) { const L = S.bl; console.log(`  [${Math.round(L.t)}s] ${L.id} 등장 hp${L.hp}% 거리${L.d0} 최소간격${L.minD} → ${Math.round(S.t - L.t)}초 만에 사망 ${JSON.stringify(Object.fromEntries(Object.entries(L.src).map(([k, v]) => [k, Math.round(v)])))}`); S.bl = null; }
     }
   }
-  return { ...C.result(S), over: S.over, fl: S.floor, lootN: (S.loot || []).length, lootG: (S.loot || []).map(x => x.g), hp: S.p.hp, w: S.W.map(w => w.id + (w.jin ? '眞' : w.evo ? '★' : w.lv)).join(',') + (S.relics ? ' [' + S.relics.join(',') + ']' : ''), dlog: S.dlog, bossHp: S.boss ? Math.round(S.boss.hp / S.boss.max * 100) : null, ot: S.ot ? Math.round(S.t - S.ot.t0) : 0, score: C.result(S).score };
+  return { ...C.result(S), evoT: S.evoT, jinT: S.jinT, lvAt: S.lvAt || {}, over: S.over, fl: S.floor, lootN: (S.loot || []).length, lootG: (S.loot || []).map(x => x.g), hp: S.p.hp, w: S.W.map(w => w.id + (w.jin ? '眞' : w.evo ? '★' : w.lv)).join(',') + (S.relics ? ' [' + S.relics.join(',') + ']' : ''), dlog: S.dlog, bossHp: S.boss ? Math.round(S.boss.hp / S.boss.max * 100) : null, ot: S.ot ? Math.round(S.t - S.ot.t0) : 0, score: C.result(S).score };
 }
 
 const HUMAN = process.env.HUMAN ? { every: +process.env.HUMAN, err: +(process.env.ERR || 1.2) } : null;
@@ -79,6 +79,8 @@ for (const hero of HEROES) {
     const b = [0, 20, 25, 30, 35, 40, 99], hist = b.slice(0, -1).map((x, i) => `${x}~${b[i + 1]}분:${ts.filter(t => t >= x && t < b[i + 1]).length}`).join(' ');
     const fl = [1, 2, 3, 4].map(n => rs.filter(r => r.fl === n).length).join('/'), esc = rs.filter(r => r.escaped).length;
     const lg = [0, 0, 0, 0]; for (const r of rs) for (const g of r.lootG) lg[g]++;
+    const avg = f => { const v = rs.map(f).filter(x => x != null); return v.length ? (v.reduce((a, b) => a + b, 0) / v.length / 60).toFixed(1) + '분(' + v.length + '판)' : '-'; };
+    console.log(`    첫 진화 ${avg(r => r.evoT)} · 진각성 ${avg(r => r.jinT)} · 레벨 5분 ${avg(r => r.lvAt[5] * 60)} 10분 ${avg(r => r.lvAt[10] * 60)} 20분 ${avg(r => r.lvAt[20] * 60)}`.replace(/(레벨[^·]*)/, m => m.replace(/분\(/g, '(').replace(/\.0/g, '')));
     console.log(`    층 분포 1/2/3/4: ${fl} · 귀환 ${esc} · 생존 중앙 ${q(0.5)}분 (10% ${q(0.1)} · 90% ${q(0.9)}) · ${hist} · 판당 장비 ${(rs.reduce((a, r) => a + r.lootN, 0) / N).toFixed(1)}개 등급별 ${lg.join('/')}`); }
   const dl={};for(const r of rs)for(const k in r.dlog)dl[k]=(dl[k]||0)+r.dlog[k];console.log('    피해원:',JSON.stringify(Object.fromEntries(Object.entries(dl).map(([k,v])=>[k,Math.round(v/N)]))));
   console.log('   ', rs.slice(0, 6).map(r => `${r.t}s${r.cleared ? '✔' : ''}${r.bossHp != null ? '(보스' + r.bossHp + '%)' : ''} ${r.w}`).join(' | '));
