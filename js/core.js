@@ -1046,7 +1046,7 @@ function overtime(S) {
   S.ev.push({ k: 'ot' }); S.ev.push({ k: 'warn', txt: '포위당했다!' });
 }
 function retire(S) { S.otAsk = false; S.over = 'clear'; }
-const Core = { V: '4.1.1', _spawnBoss: spawnBoss, _mkEnemy: mkEnemy, portalChoose, rollGear, relicPick, overtime, retire, newRun, step, choices, pick, paused, revive, result, recalc, rng, wst, setInfo, optCount };
+const Core = { V: '4.1.2', _spawnBoss: spawnBoss, _mkEnemy: mkEnemy, portalChoose, rollGear, relicPick, overtime, retire, newRun, step, choices, pick, paused, revive, result, recalc, rng, wst, setInfo, optCount };
 G.CORE = Core;
 if (typeof module !== 'undefined') module.exports = Core;
 })(typeof window !== 'undefined' ? window : globalThis);

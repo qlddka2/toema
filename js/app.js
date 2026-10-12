@@ -450,7 +450,7 @@ async function renderRank() {
 function openNick() { $('#nickin').value = RK.state().nick || ''; $('#nickmsg').textContent = ''; $('#m-nick').classList.remove('hide'); }
 $('#nickcancel').onclick = () => $('#m-nick').classList.add('hide');
 $('#nicksave').onclick = async () => { const r = await RK.setNick($('#nickin').value); if (r.ok) { $('#m-nick').classList.add('hide'); renderRank(); } else $('#nickmsg').textContent = r.msg; };
-RK.init(() => { cloudOnAuth(); if (!$('#s-menu').classList.contains('hide')) loginHint(); if (!$('#s-settings').classList.contains('hide')) renderSettings(); if (!$('#s-rank').classList.contains('hide')) renderRank(); if (RK.state().askNick) { RK.state().askNick = false; openNick(); } });
+RK.init(() => { if (RK.state().loginErr) { toast(RK.state().loginErr, 6000); RK.state().loginErr = ''; } cloudOnAuth(); if (!$('#s-menu').classList.contains('hide')) loginHint(); if (!$('#s-settings').classList.contains('hide')) renderSettings(); if (!$('#s-rank').classList.contains('hide')) renderRank(); if (RK.state().askNick) { RK.state().askNick = false; openNick(); } });
 
 /* ───── 게임 ───── */
 const cv = $('#cv'), ctx = cv.getContext('2d');
@@ -779,7 +779,7 @@ function hud() {
   }
 }
 let toastT = 0;
-function toast(t) { const el = $('#toast'); el.textContent = t; el.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => el.style.opacity = 0, 1800); }
+function toast(t, ms) { const el = $('#toast'); el.textContent = t; el.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => el.style.opacity = 0, ms || 1800); }
 function banner(a, b) { $('#banner').innerHTML = `<div class="in"><b>${esc(a)}</b><small>${esc(b)}</small></div>`; }
 
 /* ───── 그리기 ───── */
@@ -1112,7 +1112,7 @@ A.loadImages('img/', () => { setCoin(); if (!$('#s-menu').classList.contains('hi
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !(window.NATIVE && NATIVE.on)) navigator.serviceWorker.register('sw.js').catch(() => {});   // 앱은 파일이 내장돼 있어 필요 없음
 go('menu');
 (() => {   // 버전 표시: data·core·app 중 하나라도 다르면 빨갛게 (일부 파일만 올라간 배포를 바로 알 수 있게)
-  const APP_V = '4.1.1', el = $('#verlab'); if (!el) return;
+  const APP_V = '4.1.2', el = $('#verlab'); if (!el) return;
   const bad = [['data', D.VERSION], ['core', C.V || '?']].filter(q => q[1] !== APP_V);
   el.textContent = 'v' + APP_V + (bad.length ? ' ⚠ ' + bad.map(q => q[0] + ' ' + q[1]).join(' · ') : '');
   if (bad.length) { el.style.color = '#ff8a7a'; el.style.opacity = 1; }

@@ -40,7 +40,7 @@ async function login() {
   if (!sb) return;
   if (window.NATIVE && NATIVE.on) {   // 앱: 앱 전용 구글 로그인 → id 토큰으로 Supabase 로그인
     try { const token = await NATIVE.googleIdToken(); const { error } = await sb.auth.signInWithIdToken({ provider: 'google', token }); if (error) throw error; }
-    catch (e) { const m = (e && e.message) || ''; if (!/cancel/i.test(m)) { st.err = '구글 로그인에 실패했어요'; onChange(); setTimeout(() => { st.err = ''; onChange(); }, 4000); } }
+    catch (e) { const m = (e && e.message) || ''; if (!/cancel/i.test(m)) { st.loginErr = '구글 로그인에 실패했어요' + (m ? ' (' + m.slice(0, 90) + ')' : ''); onChange(); } }
     return;
   }
   try { await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); } catch (e) {}

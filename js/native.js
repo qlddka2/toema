@@ -86,7 +86,7 @@ N.googleIdToken = async function () {
   const id = cfg().googleWebClientId; if (!id) throw new Error('no_client_id');
   if (!slInit) slInit = S.initialize({ google: { webClientId: id } });
   await slInit;
-  const r = await S.login({ provider: 'google', options: { scopes: ['email', 'profile'] } });
+  const r = await S.login({ provider: 'google', options: {} });   // scopes를 넘기면 MainActivity 수정이 필요해 거절됨 (email·profile·openid는 기본 포함)
   const x = (r && (r.result || r)) || {};
   const tok = x.idToken || (x.credential && x.credential.idToken) || (x.authentication && x.authentication.idToken);
   if (!tok) throw new Error('no_token');
