@@ -1,7 +1,7 @@
 /* 퇴마 서바이벌 — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
 (function (G) {
 const D = {};
-D.VERSION = '3.9.0';
+D.VERSION = '4.1.0';
 
 /* ───── 주인공 ─────
    unlock: 해금 조건 (없으면 처음부터) */
@@ -329,13 +329,13 @@ D.GUARD_CD = lv => 13 - 1.5 * lv;   // 수호령 보호막 재충전 (초)
 /* 세트 효과: 같은 계열 무기를 함께 들면 보너스 (진화한 무기도 그대로 셈) */
 D.SETS = {
   dosul:  { name: '도술', color: '#7fd8ff', ws: ['talisman', 'thunder', 'soulfire', 'gourd', 'chain', 'frost'],
-            b: [{ n: 2, desc: '공격 속도 +8%', cd: 0.08 }, { n: 3, desc: '치명타 확률 +10%', crit: 0.10 }, { n: 4, desc: '피해 +15%', might: 0.15 }] },
+            b: [{ n: 2, desc: '공격 속도 +8%', cd: 0.08 }, { n: 3, desc: '치명타 확률 +10%, 피해 +10%', crit: 0.10, might: 0.10 }] },
   muye:   { name: '무예', color: '#ff9a6b', ws: ['staff', 'knives', 'quake', 'bow', 'twin', 'hwando'],
-            b: [{ n: 2, desc: '피해 +10%', might: 0.10 }, { n: 3, desc: '넉백 +50%, 치명타 피해 +50%', kb: 0.5, critDmg: 0.5 }, { n: 4, desc: '공격 속도 +10%', cd: 0.10 }] },
+            b: [{ n: 2, desc: '피해 +10%', might: 0.10 }, { n: 3, desc: '넉백 +50%, 치명타 피해 +50%, 공격 속도 +6%', kb: 0.5, critDmg: 0.5, cd: 0.06 }] },
   beopgu: { name: '법구', color: '#c9a7ff', ws: ['beads', 'aura', 'bell', 'fan', 'water', 'shield'],
-            b: [{ n: 2, desc: '공격 범위 +10%', area: 0.10 }, { n: 3, desc: '초당 체력 회복 +1', regen: 1 }, { n: 4, desc: '받는 피해 -15%', guardDmg: 0.15 }] },
+            b: [{ n: 2, desc: '공격 범위 +10%', area: 0.10 }, { n: 3, desc: '초당 체력 회복 +1, 받는 피해 -10%', regen: 1, guardDmg: 0.10 }] },
   gwimul: { name: '귀물', color: '#9be36b', ws: ['club', 'foxbead', 'sinjang', 'jeung'],
-            b: [{ n: 2, desc: '경험치 +10%', xp: 0.10 }, { n: 3, desc: '적을 처치할 때마다 체력 +0.3', onKill: 0.3 }, { n: 4, desc: '피해 +15%', might: 0.15 }] },
+            b: [{ n: 2, desc: '경험치 +10%', xp: 0.10 }, { n: 3, desc: '적을 처치할 때마다 체력 +0.3, 피해 +10%', onKill: 0.3, might: 0.10 }] },
   hwagi:  { name: '화기', color: '#ffcf4a', ws: ['hwacha', 'bomb', 'feather'],
             b: [{ n: 2, desc: '폭발 범위 +20%', boom: 0.20 }, { n: 3, desc: '피해 +15%, 공격 속도 +5%', might: 0.15, cd: 0.05 }] },
 };
@@ -345,7 +345,7 @@ for (const k in D.UNIONS) D.SET_OF[k] = null;   // 합격기는 두 재료 무�
 D.RELICS = {
   thunder: { name: '뇌령주',     icon: 'r_thunder', desc: '맞을 때마다 주변 적에게 낙뢰가 떨어져요' },
   coin:    { name: '저승 노잣돈', icon: 'r_coin',    desc: '금화 +40%, 받는 피해 +10%' },
-  herb:    { name: '불사초',     icon: 'r_herb',    desc: '한 번 쓰러져도 체력 40%로 일어나요' },
+  herb:    { name: '불사초',     icon: 'r_herb',    desc: '쓰러지면 체력 100%로 일어나요. 우두머리를 3마리 쓰러뜨리면 다시 채워져요' },
   mirror:  { name: '흑요 거울',   icon: 'r_mirror',  desc: '치명타 확률 +10%, 치명타 피해 +30%' },
   bell:    { name: '산신의 방울', icon: 'r_bell',    desc: '20초마다 주변 적을 2초간 기절시켜요' },
   scale:   { name: '용의 비늘',   icon: 'r_scale',   desc: '우두머리에게 주는 피해 +30%' },
@@ -362,7 +362,7 @@ D.RELICS = {
 };
 D.MAX_RELIC = 3;
 /* ───── 진(眞) 각성: 주인공의 시작 무기를 진화시킨 뒤 25레벨 이상에서 보물 상자를 열면 (그 주인공 전용) ───── */
-D.JIN = { dmg: 1.5, cd: 0.85, scale: 1.15, minLv: 25, desc: '주인 전용 2차 각성 · 피해 +50%, 공격 속도 +15%, 개수·범위 증가' };
+D.JIN = { dmg: 1.5, cd: 0.85, scale: 1.15, minLv: 25, minLvE: 30, desc: '주인 전용 2차 각성 · 피해 +50%, 공격 속도 +15%, 개수·범위 증가' };
 D.MAX_W = 4; D.MAX_P = 4; D.MAX_LV = 5;
 D.CRIT_BASE = 0.05; D.CRIT_MUL = 2;
 
@@ -530,6 +530,12 @@ D.ENDLESS = (() => {
    난이도 단계(f) = 연장전 배율(D.OT)을 그대로 씀.  층 입장: f = max(base, 지금 f + jump) · 층 안: f += 초 × rate · 포탈이 열린 뒤 머물면 f += 초 × stay */
 D.PORTAL = { at: 600, walk: [6, 8], far: 12, r: 34, homeEvery: 300, homeOpen: 60 };
 D.FLOOR_RULE = { jump: 1, stay: 1 / 45, hardMul: 1.15 };
+/* v4.0 포탈이 열린 뒤 머물면: 단계 += 2.2 × (머문 분)^1.7 → 1분 +2.2 · 2분 +7 · 3분 +14 (2~3분이면 한계) */
+D.STAY = { k: 2.2, pow: 1.7 };
+D.stayF = sec => sec > 0 ? D.STAY.k * Math.pow(sec / 60, D.STAY.pow) : 0;
+/* v4.0 백귀야행 우두머리: 층에 들어온 뒤 오른 단계만큼 체력은 정예와 같은 비율로, 피해는 그 0.8제곱만큼 커짐 */
+D.BOSS_ELITE = { dmgPow: 0.8 };
+D.ORB_MAX = 10;   // 보옥은 종류마다 10개까지 (끝없이 강해지는 고리 끊기)
 (() => {
   const C = D.CHAPTERS, mixW = (a, b) => a.map((w, i) => [w[0], (w[1] + b[i][1]) / 2, Object.assign({}, w[2], b[i][2])]);
   const half = (ws, off) => ws.filter(w => w[0] < 600).map(w => [off + w[0] / 2, w[1], w[2]]);
@@ -542,11 +548,12 @@ D.FLOOR_RULE = { jump: 1, stay: 1 / 45, hardMul: 1.15 };
       events: EVF(['fcrow', 'hbat', 'hdog'], ['fbear', 'hbuff'], 'geuseundae', 'eoduksini'), stay: ['baekho', 'hwaseo', 'jujak'], base: 1, rate: 1 / 120, boss: { hp: 2, dmg: 1.2 } },
     { n: 3, name: '저승 문턱', sub: '산 자는 돌아가지 못한다는 고개', theme: 'ash', gtint: 'rgba(70,0,30,.32)', tier: [3, 4], waves: mixW(C[4].waves, C[3].waves).filter(w => w[0] < 600),
       events: EVF(['dbat', 'dwolf', 'hcrow'], ['dbear', 'hbuff'], 'jangsanbeom', 'songaksi'), stay: ['gangcheori', 'hyeonmu', 'cheongryong'], base: 6, rate: 1 / 120, boss: { hp: 3.5, dmg: 1.4 } },
-    { n: 4, name: '염라전', sub: '저승의 심판관이 기다린다', theme: 'cave', gtint: 'rgba(40,0,70,.42)', tier: [4, 4], waves: [[0, 6.2, { dwolf: 3, dbat: 3, dsnake: 3, hdog: 2 }]],
+    { n: 4, name: '염라전', sub: '저승의 심판관이 기다린다', theme: 'cave', gtint: 'rgba(40,0,70,.42)', tier: [4, 4], waves: [[0, 5.0, { dwolf: 3, dbat: 3, dsnake: 3, hdog: 2 }]],
       events: [[20, 'elite', 'dbear'], [60, 'ring', 'dwolf', 36], [150, 'boss', 'dueoksini'], [240, 'elite', 'hbuff'], [330, 'boss', 'samdugumi'], [420, 'ring', 'dbat', 40], [510, 'boss', 'yeomra']],
-      stay: ['dueoksini', 'samdugumi', 'yeomra', 'gangcheori'], base: 12, rate: 1 / 170, boss: { hp: 4.5, dmg: 1.5 }, last: true },
+      stay: ['dueoksini', 'samdugumi', 'yeomra', 'gangcheori'], base: 10.5, jump: 0, rate: 1 / 200, boss: { hp: 3, dmg: 1.25 }, last: true },
   ];
 })();
+D.ENDLESS_XP = +(typeof process !== 'undefined' && process.env && process.env.EXP || 0.55);   // v4.0 백귀야행 경험치 배율 (무기가 5분 만에 다 크지 않게)
 D.FLOOR_SCORE = [0, 3000, 8000, 15000];   // 도달한 층 보너스 (서버 공식과 같음)
 D.escore = (t, kills, bosses, floor = 1) => 10 * t + kills + 2000 * bosses + (D.FLOOR_SCORE[Math.max(1, Math.min(4, floor)) - 1] || 0);
 
@@ -560,22 +567,28 @@ D.GRADES = [
   { name: '전설', col: '#f2c14e', mul: 3.6 },
 ];
 D.GSLOTS = { body: '몸', feet: '발', acc: '장신구' };
-// stat: hp 최대체력% · cut 받는 피해 감소% · dmg 주는 피해% · spd 이동% · mag 흡수 범위% · regen 초당 회복 · kheal 처치 회복 · crit 치명타 · cd 공격 속도
+// v4.0 칸마다 역할 하나: 몸 = 버티기 · 발 = 움직임 · 장신구 = 공격 (칸끼리 능력이 겹치지 않음)
+// stat: cut 받는 피해 감소% · hp 최대체력% · regen 초당 회복 · spd 이동% · mag 흡수 범위% · gold 금화% · dodge 회피% · dmg 주는 피해% · kheal 처치 회복 · cd 공격 속도 · crit 치명타
+// img: 장비 전용 그림(제미나이 C 묶음)이 오면 icon_gear_<id>.png 를 쓰고, 없으면 icon 으로 대신 그림
 D.GEAR = {
-  armor:   { name: '가죽 갑옷',   icon: 'armor',   slot: 'body', stat: { cut: 0.10 } },
-  shield:  { name: '범 무늬 방패', icon: 'shield',  slot: 'body', stat: { hp: 0.18 } },
-  sinjang: { name: '신장 갑주',   icon: 'sinjang', slot: 'body', stat: { cut: 0.06, hp: 0.10 }, leg: { id: 'aegis', name: '신장의 가호', desc: '체력이 30% 밑으로 떨어지면 4초 무적 (층마다 1번)' } },
-  shoes:   { name: '바람 신발',   icon: 'r_shoes', slot: 'feet', stat: { spd: 0.06, mag: 0.2 } },
-  swift:   { name: '날개 장화',   icon: 'swift',   slot: 'feet', stat: { spd: 0.04, cd: 0.05 }, leg: { id: 'gale', name: '질풍', desc: '움직이는 동안 받는 피해 −15%' } },
-  beads:   { name: '나무 염주',   icon: 'beads',   slot: 'acc', stat: { regen: 0.8 } },
-  guard:   { name: '수호 구슬',   icon: 'guard',   slot: 'acc', stat: { crit: 0.04, cut: 0.04 } },
-  foxbead: { name: '여우구슬',    icon: 'foxbead', slot: 'acc', stat: { kheal: 0.2 }, leg: { id: 'foxfire', name: '여우불', desc: '요괴를 쓰러뜨리면 10% 확률로 여우불이 날아가 폭발' } },
-  feather: { name: '삼족오 깃털', icon: 'feather', slot: 'acc', stat: { dmg: 0.15 }, leg: { id: 'sun', name: '태양의 깃', desc: '7초마다 주변에 불꽃이 터짐' } },
+  armor:   { name: '가죽 갑옷',     icon: 'armor',   slot: 'body', stat: { cut: 0.10 } },
+  robe:    { name: '범가죽 두루마기', icon: 'vigor',   slot: 'body', stat: { hp: 0.18 } },
+  sinjang: { name: '신장 갑주',     icon: 'sinjang', slot: 'body', stat: { regen: 1.2 }, leg: { id: 'aegis', name: '신장의 가호', desc: '체력이 30% 밑으로 떨어지면 4초 무적 (층마다 1번)' } },
+  shoes:   { name: '바람 미투리',   icon: 'r_shoes', slot: 'feet', stat: { spd: 0.06 } },
+  chukji:  { name: '축지 짚신',     icon: 'magnet',  slot: 'feet', stat: { mag: 0.3, gold: 0.06 } },
+  shadow:  { name: '그림자 버선',   icon: 'swift',   slot: 'feet', stat: { dodge: 0.05 }, leg: { id: 'gale', name: '질풍', desc: '움직이는 동안 받는 피해 −15%' } },
+  feather: { name: '삼족오 깃털',   icon: 'feather', slot: 'acc', stat: { dmg: 0.15 }, leg: { id: 'sun', name: '태양의 깃', desc: '7초마다 주변에 불꽃이 터짐' } },
+  foxbead: { name: '여우구슬',      icon: 'foxbead', slot: 'acc', stat: { kheal: 0.2 }, leg: { id: 'foxfire', name: '여우불', desc: '요괴를 쓰러뜨리면 10% 확률로 여우불이 날아가 폭발' } },
+  beads:   { name: '나무 염주',     icon: 'beads',   slot: 'acc', stat: { cd: 0.05 } },
+  bell:    { name: '청동 방울',     icon: 'r_bell',  slot: 'acc', stat: { crit: 0.04 } },
 };
+// 예전(v3.9) 장비 → v4.0 장비
+D.GEAR_OLD = { shield: 'robe', swift: 'shadow', guard: 'bell' };
 D.gearStat = (id, g) => { const b = D.GEAR[id].stat, m = D.GRADES[g].mul, o = {}; for (const k in b) o[k] = b[k] * m; return o; };
 D.gearText = (id, g) => { const s = D.gearStat(id, g), P = v => Math.round(v * 100) + '%';
   return [s.hp && `최대 체력 +${P(s.hp)}`, s.cut && `받는 피해 −${P(s.cut)}`, s.dmg && `주는 피해 +${P(s.dmg)}`, s.spd && `이동 속도 +${P(s.spd)}`, s.mag && `구슬 흡수 범위 +${P(s.mag)}`,
-    s.regen && `초당 체력 회복 +${s.regen.toFixed(1)}`, s.kheal && `처치할 때 체력 +${s.kheal.toFixed(2)}`, s.crit && `치명타 확률 +${P(s.crit)}`, s.cd && `공격 속도 +${P(s.cd)}`].filter(Boolean).join(' · '); };
+    s.regen && `초당 체력 회복 +${s.regen.toFixed(1)}`, s.kheal && `처치할 때 체력 +${s.kheal.toFixed(2)}`, s.crit && `치명타 확률 +${P(s.crit)}`, s.cd && `공격 속도 +${P(s.cd)}`,
+    s.gold && `금화 +${P(s.gold)}`, s.dodge && `피해를 피할 확률 ${P(s.dodge)}`].filter(Boolean).join(' · '); };
 // 층별 등급 확률 [평범, 고급, 희귀, 전설] — 층마다 최고 등급 상한. 우두머리 상자는 굴린 뒤 한 단계 위(층 상한까지)
 D.GEAR_DROP = { odds: [[85, 15, 0, 0], [35, 55, 10, 0], [10, 45, 45, 0], [0, 30, 50, 20]], cap: [1, 2, 2, 3], elite: 0.2, otElite: 0.04, mid: 0.5 };
 D.GEAR_BAG = 40;                        // 보관함 칸 수
