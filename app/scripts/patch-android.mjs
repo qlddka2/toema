@@ -1,5 +1,5 @@
 // cap add android 로 만든 안드로이드 프로젝트를 출시용으로 고침
-//  - targetSdk·compileSdk 36 (2026-08-31부터 필수), 필요하면 AGP 올림
+//  - targetSdk·compileSdk 36 (2026-08-31부터 필수), minSdk 24 (Play 자동 보호), 필요하면 AGP 올림
 //  - AdMob 앱 ID, 세로 고정, 버전 번호, 업로드 키 서명
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 const A = new URL('../android/', import.meta.url).pathname, R = new URL('../../', import.meta.url).pathname;
@@ -9,7 +9,9 @@ const must = (ok, msg) => { if (!ok) { console.error('PATCH FAILED: ' + msg); pr
 // 1) SDK 버전
 let v = rd('variables.gradle');
 v = v.replace(/compileSdkVersion\s*=\s*(\d+)/, (m, n) => `compileSdkVersion = ${Math.max(36, +n)}`)
-     .replace(/targetSdkVersion\s*=\s*(\d+)/, (m, n) => `targetSdkVersion = ${Math.max(36, +n)}`);
+     .replace(/targetSdkVersion\s*=\s*(\d+)/, (m, n) => `targetSdkVersion = ${Math.max(36, +n)}`)
+     .replace(/minSdkVersion\s*=\s*(\d+)/, (m, n) => `minSdkVersion = ${Math.max(24, +n)}`);   // Play 자동 보호는 최소 SDK 24 이상
+must(/minSdkVersion\s*=\s*(2[4-9]|[3-9]\d)/.test(v), 'minSdkVersion 24 이상으로 못 바꿈');
 wr('variables.gradle', v);
 // AGP 8.9 미만이면 올림 (compileSdk 36 지원), Gradle 래퍼도 맞춤
 let b = rd('build.gradle');
