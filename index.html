@@ -119,6 +119,10 @@ a{color:var(--gold)}
 .hero.lock{opacity:.5}.hero.lock .pt{filter:grayscale(1) brightness(.6)}
 .otinfo{font-size:13px;color:var(--dim);line-height:1.6;margin:6px 0 12px}.otinfo b{color:var(--gold)}
 #timer.ot{color:#ff8a5a}
+#timer.late{color:#ff6a5a;animation:tlate 1s steps(2) infinite}
+@keyframes tlate{50%{opacity:.55}}
+#spdbtn{pointer-events:auto;position:absolute;top:calc(54px + env(safe-area-inset-top));right:8px;width:38px;height:30px;border-radius:10px;background:#0007;border:1px solid #fff2;font-size:12px;font-weight:900;letter-spacing:-2px;color:#fff}
+#spdbtn.on{background:#f2c14ecc;color:#1a1208;border-color:#f2c14e}
 .ch.endless{border-color:#7a4bd0;background:linear-gradient(90deg,#2a1840,var(--panel))}.ch.endless .n{color:#c9a7ff}.ch.endless small b{color:#c9a7ff}
 .opt.relic{border-color:#7a4bd0}
 #slr img{border-color:#c9a7ff66}
@@ -204,6 +208,7 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
     <div id="timer">00:00</div>
     <div id="hudr"><div id="hkills">0</div><div id="hgold" class="coins"><i></i><span>0</span></div></div>
     <button id="pausebtn" aria-label="일시정지">II</button>
+    <button id="spdbtn" aria-label="1배속">▶</button>
     <div id="slots"><div class="s" id="slw"></div><div class="s" id="slp"></div><div class="s" id="slset"></div><div class="s" id="slr"></div></div>
     <div id="floortag" class="hide"></div><div id="lootchip" class="hide"></div>
     <div id="bossbar" class="hide"><b id="bossname"></b><div class="bar"><div id="bossfill"></div></div></div>
@@ -224,7 +229,7 @@ html[lang=ja] .title,html[lang=en] .title{font-size:42px}
       <div class="row"><button class="btn" data-go="mission">임무·출석<span class="badge hide" id="bdg-mis"></span></button><button class="btn" data-go="ach">업적<span class="badge hide" id="bdg-ach"></span></button></div>
       <div class="row"><button class="btn ghost" data-go="codex">비급 도감</button><button class="btn ghost" data-go="settings">설정</button></div>
       <div id="loginhint" class="lhint hide"></div>
-      <div id="verlab" class="small" style="opacity:.45;margin-top:6px">v4.1.2</div>
+      <div id="verlab" class="small" style="opacity:.45;margin-top:6px">v4.1.3</div>
     </div>
     <div style="padding-top:12px" class="coins"><i></i><span class="goldv">0</span></div>
   </section>

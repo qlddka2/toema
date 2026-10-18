@@ -487,7 +487,7 @@ function startRun() {
   S = C.newRun({ hero: SV.hero, chapter: SV.ch, hard: SV.hard, meta: Object.assign({}, SV.meta), hlv: (SV.hlv || {})[SV.hero] || 1, viewR: 420, gear: gearIn.map(x => ({ id: x.id, g: x.g })) });
   S.gearU = gearIn.map(x => x.u); FEEL.parrow = 0;
   S.revivable = true; S.goldDoubled = false;
-  $('#hud').classList.remove('hide'); $('#bossbar').classList.add('hide');
+  $('#hud').classList.remove('hide'); $('#bossbar').classList.add('hide'); spdLabel();
   running = true; last = performance.now(); paused = false; slotSig = '';
   SND.music(fieldMusic());
   if (S.endless) banner((S.hard ? '백귀야행 (어려움)' : '백귀야행') + ' · 1층 ' + D.FLOORS[0].name, '이번 주 조건 · ' + D.weekly().name + ' · 10분 뒤 포탈이 열려요'); else banner(S.ch.id + '장 · ' + S.ch.name + (S.hard ? ' (어려움)' : ''), '살아남아 우두머리를 쓰러뜨려라');
@@ -498,7 +498,7 @@ function startRun() {
 let paused = false, modal = null;
 function pause() {
   if (!S || S.over || modal) return; paused = true;
-  $('#pinfo').innerHTML = S.endless ? `백귀야행 ${S.floor}층 ${S.ch.floorName}${S.hard ? ' (어려움)' : ''} · ${fmt(S.t)} · Lv ${S.lv}${S.loot.length || S.gear.length ? `<div class="ploot">${S.gear.map(x => `<img style="--c:${D.GRADES[x.g].col}" src="${gearIcon(x.id, x.g, 34)}">`).join('')}${S.loot.map(x => `<img style="--c:${D.GRADES[x.g].col};opacity:.75" src="${gearIcon(x.id, x.g, 34)}">`).join('')}</div><small style="color:#ff9a8a">포기하면 입고 온 장비와 주운 장비를 모두 잃어요</small>` : ''}` : `${S.ch.name}${S.hard ? ' (어려움)' : ''} · ${fmt(S.t)} · Lv ${S.lv}`;
+  $('#pinfo').innerHTML = S.endless ? `백귀야행 ${S.floor}층 ${S.ch.floorName}${S.hard ? ' (어려움)' : ''} · ${fmt(S.t)} · Lv ${S.lv}${S.loot.length || S.gear.length ? `<div class="ploot">${S.gear.map(x => `<img style="--c:${D.GRADES[x.g].col}" src="${gearIcon(x.id, x.g, 34)}">`).join('')}${S.loot.map(x => `<img style="--c:${D.GRADES[x.g].col};opacity:.75" src="${gearIcon(x.id, x.g, 34)}">`).join('')}</div><small style="color:#ff9a8a">포기하면 입고 온 장비와 주운 장비를 모두 잃어요</small>` : ''}` : `${S.ch.name}${S.hard ? ' (어려움)' : ''} · ${S.ot || S.cleared ? fmt(S.t) : fmt(Math.max(0, Math.ceil(D.BOSS_TIME - S.t)))} · Lv ${S.lv}`;
   $('#pbuild').innerHTML = S.W.map(w => { const W = D.WEAPONS[w.id]; return `<div class="bi"><img src="${A.iconURL(W.icon, 32, w.evo)}"><span>${w.jin ? '진·' + W.evo.name : w.evo ? W.evo.name : W.name + ' ' + w.lv}</span><em>${w.union ? '합격기' : w.jin ? '진 각성' : w.evo ? (w.id === S.hero.weapon ? `진 각성: Lv${S.endless ? D.JIN.minLvE : D.JIN.minLv} 이후 상자` : '진화') : '진화: ' + D.PASSIVES[W.evo.with].name}</em></div>`; }).join('')
     + (S.relics || []).map(r => `<div class="bi"><img src="${A.iconURL(D.RELICS[r].icon, 32)}"><span>${D.RELICS[r].name}</span><em>${D.RELICS[r].desc}</em></div>`).join('')
     + (S.orbs ? `<div class="bi"><span>보옥</span><em>${Object.entries(S.orbs).map(([k, n]) => D.ORBS[k].name.replace(' 보옥', '') + ' ×' + n).join(' · ')}</em></div>` : '')
@@ -507,6 +507,9 @@ function pause() {
   $('#sndbtn2').textContent = '소리: ' + (SV.snd || SV.bgm !== false ? '켜짐' : '꺼짐'); $('#m-pause').classList.remove('hide'); modal = 'pause';
 }
 $('#pausebtn').onclick = pause;
+function spdLabel() { const b = $('#spdbtn'); if (!b) return; b.textContent = SV.spd === 2 ? '▶▶' : '▶'; b.classList.toggle('on', SV.spd === 2); b.setAttribute('aria-label', SV.spd === 2 ? '2배속' : '1배속'); }
+$('#spdbtn').onclick = () => { SV.spd = SV.spd === 2 ? 1 : 2; save(); spdLabel(); toast(SV.spd === 2 ? '2배속' : '1배속'); };
+spdLabel();
 $('#otgo').onclick = () => { $('#m-ot').classList.add('hide'); modal = null; C.overtime(S); last = performance.now(); events(); };
 $('#otend').onclick = () => { $('#m-ot').classList.add('hide'); modal = null; C.retire(S); finish(); };
 $('#resume').onclick = () => { $('#m-pause').classList.add('hide'); modal = null; paused = false; last = performance.now(); };
@@ -536,7 +539,11 @@ function loop(now) {
   if (!paused && !modal) {
     S.viewR = hyp(W, H) / 2 / K + 30; S.vw = W / 2 / K; S.vh = H / 2 / K;   // 화면 절반 크기(월드 단위)
     const inp = input();
-    if (dt > 0) C.step(S, dt, inp); SND.intensity && SND.intensity(0.2 + S.t / 420 + (S.hard ? 0.3 : 0));
+    if (dt > 0) for (let k = 0, n = SV.spd === 2 ? 2 : 1; k < n; k++) {   // 2배속: 한 화면에 두 번 진행
+      C.step(S, dt, inp);
+      if (k < n - 1) { events(); if (modal || paused || S.over || S.pendingLv > 0 || S.chests > 0 || S.relicAsk || S.portalAsk || S.otAsk) break; }
+    }
+    SND.intensity && SND.intensity(0.2 + S.t / 420 + (S.hard ? 0.3 : 0));
     if (tutT > 0) { tutT -= dt; if (tutT <= 0 || (hyp(inp.x, inp.y) > 0.3 && S.t > 2)) { tutT = 0; $('#tut').classList.add('hide'); SV.tut = true; save(); } }
     events();
   }
@@ -556,7 +563,7 @@ function events() {
     else if (e.k === 'boss') { if (e.id && !(SV.bseen || {})[e.id]) { SV.bseen = Object.assign({}, SV.bseen, { [e.id]: 1 }); persist(); } SND.play('boss'); vib([60, 40, 60]); kick(9); flashScr(0.15, '255,60,40'); banner(e.name, e.final ? '최종 우두머리 · 결계에 갇혔다!' : '우두머리 출현 · 결계에 갇혔다!'); $('#bossname').textContent = e.name; $('#bossbar').classList.remove('hide'); SND.music('boss'); }
     else if (e.k === 'bossdown' || e.k === 'clear') { FEEL.slow = 0.9; kick(14); flashScr(0.55); }
     if (e.k === 'bossdown' && e.ot) { toast(e.name + ' 퇴치!'); $('#bossbar').classList.add('hide'); SND.music(fieldMusic()); }
-    else if (e.k === 'bossdown') { toast(e.name + ' 퇴치! 10:00에 최종 우두머리가 나타나요'); $('#bossbar').classList.add('hide'); SND.music(fieldMusic()); }
+    else if (e.k === 'bossdown') { toast(e.name + ' 퇴치! 시간이 다 되면 최종 우두머리가 나타나요'); $('#bossbar').classList.add('hide'); SND.music(fieldMusic()); }
     else if (e.k === 'clear') { SND.music(''); SND.play('clear'); $('#bossbar').classList.add('hide'); if (S.otAsk) { modal = 'ot'; $('#m-ot').classList.remove('hide'); } }
     else if (e.k === 'ot') { banner('연장전', '버틸 수 있을 만큼 버텨라'); SND.music('boss'); SND.play('boss'); vib([80, 40, 80]); }
     else if (e.k === 'otlv') { toast(S.endless ? `행렬이 거세진다 (${e.lv}단계) · 금화 +${e.gold}` : `연장 ${e.lv}분 · 적이 더 강해진다! 금화 +${e.gold}`); SND.play('boss'); }
@@ -759,7 +766,9 @@ function hud() {
   if (!S) return;
   $('#xpfill').style.width = Math.min(100, S.xp / S.need * 100) + '%';
   $('#lvtag').textContent = 'Lv ' + S.lv;
-  const otOn = S.ot && !S.endless; $('#timer').textContent = otOn ? '연장 ' + fmt(S.t - S.ot.t0) : fmt(S.t); $('#timer').classList.toggle('ot', !!otOn);
+  const otOn = S.ot && !S.endless, left = D.BOSS_TIME - S.t, cd = !S.endless && !otOn && !S.cleared;   // 1~5장: 10분에서 거꾸로, 버티기(연장)는 다시 앞으로
+  $('#timer').textContent = otOn ? '연장 ' + fmt(S.t - S.ot.t0) : cd ? (left > 0 ? fmt(Math.ceil(left)) : '최종 우두머리') : fmt(S.t);
+  $('#timer').classList.toggle('ot', !!otOn); $('#timer').classList.toggle('late', cd && left <= 60);
   $('#hkills').textContent = '☠ ' + S.kills.toLocaleString();
   $('#hgold span').textContent = Math.floor(S.gold).toLocaleString();
   if (S.endless) {
@@ -1112,7 +1121,7 @@ A.loadImages('img/', () => { setCoin(); if (!$('#s-menu').classList.contains('hi
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !(window.NATIVE && NATIVE.on)) navigator.serviceWorker.register('sw.js').catch(() => {});   // 앱은 파일이 내장돼 있어 필요 없음
 go('menu');
 (() => {   // 버전 표시: data·core·app 중 하나라도 다르면 빨갛게 (일부 파일만 올라간 배포를 바로 알 수 있게)
-  const APP_V = '4.1.2', el = $('#verlab'); if (!el) return;
+  const APP_V = '4.1.3', el = $('#verlab'); if (!el) return;
   const bad = [['data', D.VERSION], ['core', C.V || '?']].filter(q => q[1] !== APP_V);
   el.textContent = 'v' + APP_V + (bad.length ? ' ⚠ ' + bad.map(q => q[0] + ' ' + q[1]).join(' · ') : '');
   if (bad.length) { el.style.color = '#ff8a7a'; el.style.opacity = 1; }
