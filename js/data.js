@@ -1,7 +1,7 @@
 /* 퇴마 서바이벌 — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
 (function (G) {
 const D = {};
-D.VERSION = '4.1.4';
+D.VERSION = '4.1.5';
 
 /* ───── 주인공 ─────
    unlock: 해금 조건 (없으면 처음부터) */
@@ -616,7 +616,12 @@ D.WEEKLY = [
 ];
 // v3.0까지의 주는 예전 8개 순서 그대로(이미 쌓인 주간 랭킹 조건이 바뀌지 않게), 그 다음 주부터 12개로 돌아요
 D.WEEK_V3 = 2962;
-D.weekly = (w = D.weekNo()) => w <= D.WEEK_V3 ? D.WEEKLY[((w % 8) + 8) % 8] : D.WEEKLY[(w - D.WEEK_V3 + 7) % D.WEEKLY.length];
+// v4.1.5: '거울 세계'(좌우 반대)는 버그로 느껴져서 뺌 → 그 주는 '풍요'로 대신 (목록은 그대로 둬서 다른 주의 순서는 안 바뀜)
+D.WEEK_OFF = { mirror: 'feast' };
+D.weekly = (w = D.weekNo()) => {
+  const x = w <= D.WEEK_V3 ? D.WEEKLY[((w % 8) + 8) % 8] : D.WEEKLY[(w - D.WEEK_V3 + 7) % D.WEEKLY.length];
+  return D.WEEK_OFF[x.id] ? D.WEEKLY.find(q => q.id === D.WEEK_OFF[x.id]) : x;
+};
 
 D.HARD = { spawnMul: 1.15, goldMul: 1.6, firstGold: 2 };
 /* ───── 난이도 단계 (v3.5) ─────

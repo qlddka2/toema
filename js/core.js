@@ -1007,7 +1007,6 @@ function step(S, dt, inp) {
   S.t += dt; S.tele.length = 0;
   const p = S.p;
   let mx = inp ? inp.x : 0, my = inp ? inp.y : 0; const m = hyp(mx, my);
-  if (S.wk === 'mirror') mx = -mx;   // 거울 세계
   if (m > 1) { mx /= m; my /= m; }
   p.moving = m > 0.05;
   if (p.moving) { const n = hyp(mx, my); p.fx = mx / n; p.fy = my / n; if (Math.abs(mx) > 0.05) p.face = mx > 0 ? 1 : -1; }
@@ -1051,7 +1050,7 @@ function overtime(S) {
   S.ev.push({ k: 'ot' }); S.ev.push({ k: 'warn', txt: '포위당했다!' });
 }
 function retire(S) { S.otAsk = false; S.over = 'clear'; }
-const Core = { V: '4.1.4', _spawnBoss: spawnBoss, _mkEnemy: mkEnemy, portalChoose, rollGear, relicPick, overtime, retire, newRun, step, choices, pick, paused, revive, result, recalc, rng, wst, setInfo, optCount };
+const Core = { V: '4.1.5', _spawnBoss: spawnBoss, _mkEnemy: mkEnemy, portalChoose, rollGear, relicPick, overtime, retire, newRun, step, choices, pick, paused, revive, result, recalc, rng, wst, setInfo, optCount };
 G.CORE = Core;
 if (typeof module !== 'undefined') module.exports = Core;
 })(typeof window !== 'undefined' ? window : globalThis);
