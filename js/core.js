@@ -213,7 +213,11 @@ const wst = w => w.jin ? jinStats(w.id) : w.evo ? D.WEAPONS[w.id].evo.s : D.WEAP
 /* ───── 레벨업·상자 선택지 ───── */
 function evoReady(S) { return S.W.filter(w => !w.evo && w.lv >= D.MAX_LV && (S.P[D.WEAPONS[w.id].evo.with] || 0) > 0); }
 // 합격기: 두 재료 무기가 모두 진화한 상태
-function unionReady(S) { for (const k in D.UNIONS) { const u = D.UNIONS[k], a = S.W.find(w => w.id === u.a), b = S.W.find(w => w.id === u.b); if (a && b && a.evo && b.evo) return k; } return null; }
+// v4.1.4: 한쪽이 진화 + 다른 쪽이 5레벨(또는 진화)이면 완성. 보물 상자뿐 아니라 레벨업에서도 바로 나옴
+const unionOk = (a, b) => a && b && !a.union && !b.union && ((a.evo && (b.evo || b.lv >= D.MAX_LV)) || (b.evo && a.lv >= D.MAX_LV));
+function unionReady(S) { for (const k in D.UNIONS) { const u = D.UNIONS[k], a = S.W.find(w => w.id === u.a), b = S.W.find(w => w.id === u.b); if (unionOk(a, b)) return k; } return null; }
+// 합격기 짝: 이 무기와 짝인 무기를 이미 들고 있으면 그 짝 무기 id
+function unionMate(S, id) { for (const k in D.UNIONS) { const u = D.UNIONS[k]; if (u.a === id && S.W.some(w => w.id === u.b)) return { k, mate: u.b }; if (u.b === id && S.W.some(w => w.id === u.a)) return { k, mate: u.a }; } return null; }
 // 선택지 개수: 복주머니(상자 +1), 도깨비 장터(레벨업 -1)
 const optCount = S => S.chests > 0 ? 3 + ((S.relics || []).includes('pouch') ? 1 : 0) : (S.wk === 'market' ? 2 : 3);
 function choices(S, n = 3, ex = []) {   // ex: 다시 뽑기 때 방금 보여준 선택지 (가능하면 제외)
@@ -221,10 +225,11 @@ function choices(S, n = 3, ex = []) {   // ex: 다시 뽑기 때 방금 보여�
     const ev = !G || S.t >= G.evo ? evoReady(S) : []; if (ev.length) return [describe({ kind: 'evo', id: ev[0].id })];
     const un = !G || S.t >= G.union ? unionReady(S) : null; if (un) return [describe({ kind: 'union', id: un })];
     const jw = S.W.find(w => w.id === S.hero.weapon && w.evo && !w.jin); if (jw && (!G || S.t >= G.jin) && S.lv >= (S.endless ? D.JIN.minLvE : D.JIN.minLv)) return [describe({ kind: 'jin', id: jw.id })]; }
+  if (!(S.chests > 0)) { const un = unionReady(S); if (un && (!S.endless || S.t >= D.ENDLESS_GATE.union)) return [describe({ kind: 'union', id: un })]; }   // v4.1.4 레벨업에서도 합격기
   const R = S.R, pool = [];
   const owned = new Set(S.W.flatMap(w => [w.id, ...(D.WEAPONS[w.id].union || [])]));
   for (const w of S.W) if (w.lv < D.MAX_LV && !w.union) pool.push({ kind: 'w', id: w.id, lv: w.lv + 1, wt: 1.6 });   // v3.0: 무기가 많아진 만큼 가진 무기 강화가 더 잘 나오게
-  if (S.W.length < D.MAX_W) for (const id in D.WEAPONS) if (!owned.has(id) && !D.isUnion(id)) pool.push({ kind: 'w', id, lv: 1, wt: (S.sets && S.sets[D.SET_OF[id]]) ? 1.35 : 1 });   // 세트를 맞출 수 있는 무기는 조금 더 잘 나옴
+  if (S.W.length < D.MAX_W) for (const id in D.WEAPONS) if (!owned.has(id) && !D.isUnion(id)) pool.push({ kind: 'w', id, lv: 1, wt: ((S.sets && S.sets[D.SET_OF[id]]) ? 1.35 : 1) * (unionMate(S, id) ? D.UNION_BIAS : 1) });   // v4.1.4: 합격기 짝 무기는 더 잘 나옴   // 세트를 맞출 수 있는 무기는 조금 더 잘 나옴
   const pc = Object.keys(S.P).length;
   for (const id in S.P) if (S.P[id] < D.MAX_LV) pool.push({ kind: 'p', id, lv: S.P[id] + 1, wt: 1.0 });
   if (pc < D.MAX_P) for (const id in D.PASSIVES) if (!(id in S.P)) {
@@ -245,7 +250,7 @@ function choices(S, n = 3, ex = []) {   // ex: 다시 뽑기 때 방금 보여�
   if (out.length < n) { let ks = Object.keys(D.ORBS).filter(k => orbOk(k) && !out.some(o => o.id === k) && !ex.includes('orb:' + k)); if (ks.length < n - out.length) ks = Object.keys(D.ORBS).filter(k => orbOk(k) && !out.some(o => o.id === k)); while (out.length < n && ks.length) out.push({ kind: 'orb', id: ks.splice((R() * ks.length) | 0, 1)[0] }); }
   if (out.length < n && !out.some(o => o.kind === 'heal')) out.push({ kind: 'heal' });   // 보옥까지 다 채우면 인삼·엽전
   while (out.length < n) out.push({ kind: 'gold' });
-  for (const o of out) { describe(o); if (o.kind === 'w') o.set = setInfo(S, o.id, o.lv === 1); }
+  for (const o of out) { describe(o); if (o.kind === 'w') { o.set = setInfo(S, o.id, o.lv === 1); const um = o.lv === 1 && unionMate(S, o.id); if (um) { o.uni = D.UNIONS[um.k].name; o.uniMate = D.WEAPONS[um.mate].name; } } }
   return out;
 }
 function setInfo(S, id, adding) {
@@ -258,7 +263,7 @@ function describe(o) {
   else if (o.kind === 'p') { const P = D.PASSIVES[o.id]; o.name = P.name; o.icon = P.icon; o.desc = P.desc; }
   else if (o.kind === 'evo') { const W = D.WEAPONS[o.id]; o.name = W.evo.name; o.icon = W.icon; o.desc = W.evo.desc; o.from = W.name; }
   else if (o.kind === 'jin') { const W = D.WEAPONS[o.id]; o.name = '진·' + W.evo.name; o.icon = W.icon; o.desc = D.JIN.desc; o.from = W.evo.name; }
-  else if (o.kind === 'union') { const U = D.UNIONS[o.id]; o.name = U.name; o.icon = o.id; o.desc = U.desc; o.from = D.WEAPONS[U.a].evo.name + ' + ' + D.WEAPONS[U.b].evo.name; }
+  else if (o.kind === 'union') { const U = D.UNIONS[o.id]; o.name = U.name; o.icon = o.id; o.desc = U.desc; o.from = D.WEAPONS[U.a].name + ' + ' + D.WEAPONS[U.b].name; }
   else if (o.kind === 'orb') { const O = D.ORBS[o.id]; o.name = O.name; o.icon = O.icon; o.desc = O.desc + ' (중첩)'; }
   else if (o.kind === 'heal') { o.name = '인삼'; o.icon = 'heal'; o.desc = '체력 40% 회복'; }
   else { o.name = '엽전 꾸러미'; o.icon = 'gold'; o.desc = '금화 +25'; }
@@ -1046,7 +1051,7 @@ function overtime(S) {
   S.ev.push({ k: 'ot' }); S.ev.push({ k: 'warn', txt: '포위당했다!' });
 }
 function retire(S) { S.otAsk = false; S.over = 'clear'; }
-const Core = { V: '4.1.3', _spawnBoss: spawnBoss, _mkEnemy: mkEnemy, portalChoose, rollGear, relicPick, overtime, retire, newRun, step, choices, pick, paused, revive, result, recalc, rng, wst, setInfo, optCount };
+const Core = { V: '4.1.4', _spawnBoss: spawnBoss, _mkEnemy: mkEnemy, portalChoose, rollGear, relicPick, overtime, retire, newRun, step, choices, pick, paused, revive, result, recalc, rng, wst, setInfo, optCount };
 G.CORE = Core;
 if (typeof module !== 'undefined') module.exports = Core;
 })(typeof window !== 'undefined' ? window : globalThis);

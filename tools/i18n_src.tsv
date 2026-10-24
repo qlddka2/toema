@@ -978,3 +978,5 @@ Lv{n} 이후 상자	chest after Lv {0}	Lv{0}以降の宝箱	{0}级后的宝箱
 광고 보고 금화 {n}배 (오늘 첫 번째)	Watch ad: ×{0} gold (today's first)	広告を見て金貨{0}倍（本日初回）	看广告金币×{0}（今日首次）
 광고 보고 금화 +{n}% (+{n})	Watch ad: +{0}% gold (+{1})	広告を見て金貨+{0}%（+{1}）	看广告金币+{0}%（+{1}）
 금화 +{n} 받음	Got +{0} gold	金貨 +{0} 獲得	获得金币 +{0}
+합격기 짝	Combo pair	合撃ペア	合击搭配
+합격기 · 짝 무기 중 하나는 진화, 다른 하나는 5레벨	Combo Arts · one paired weapon evolved, the other at Lv 5	合撃技 · ペア武器の片方を進化、もう片方をLv5	合击技 · 搭配武器一件进化，另一件达到5级

@@ -293,7 +293,7 @@ function renderCodex() {
   }).join('');
   $('#clist').insertAdjacentHTML('afterbegin', setsHTML({}));
   $('#clist').insertAdjacentHTML('beforeend', `<div class="sets"><h4>진(眞) 각성 · 주인공 전용</h4>` + Object.entries(D.HEROES).map(([h, H]) => { const W = D.WEAPONS[H.weapon], got = (SV.jin || {})[h]; return `<div class="setrow"><span class="setc" style="--c:#ff6a3d">${H.name}</span><small>${W.name} → ${SV.evo[H.weapon] ? W.evo.name : '???'} → ${got ? '진·' + W.evo.name + ' ✔' : '???'}</small></div>`; }).join('') + `<div class="small" style="margin:4px 2px 10px">${D.JIN.desc}. 시작 무기를 진화시킨 뒤 ${D.JIN.minLv}레벨 이상에서 보물 상자를 열면 나와요.</div>`
-    + `<h4>합격기 · 진화한 두 무기를 함께 들고 보물 상자</h4>` + Object.entries(D.UNIONS).map(([k, U]) => { const got = (SV.union || {})[k]; return `<div class="up"><img src="${A.iconURL(k, 44)}" style="width:44px;height:44px;${got ? '' : 'filter:grayscale(1) brightness(.6)'}"><div class="nm"><b>${got ? U.name : '???'}</b><small>${D.WEAPONS[U.a].evo.name} + ${D.WEAPONS[U.b].evo.name}</small>${got ? `<small style="color:var(--gold)">${U.desc}</small>` : ''}</div></div>`; }).join('')
+    + `<h4>합격기 · 짝 무기 중 하나는 진화, 다른 하나는 5레벨</h4>` + Object.entries(D.UNIONS).map(([k, U]) => { const got = (SV.union || {})[k]; return `<div class="up"><img src="${A.iconURL(k, 44)}" style="width:44px;height:44px;${got ? '' : 'filter:grayscale(1) brightness(.6)'}"><div class="nm"><b>${got ? U.name : '???'}</b><small>${D.WEAPONS[U.a].name} + ${D.WEAPONS[U.b].name}</small>${got ? `<small style="color:var(--gold)">${U.desc}</small>` : ''}</div></div>`; }).join('')
     + `<h4>유물 · 우두머리 처치 보상 (한 판 최대 ${D.MAX_RELIC}개)</h4>` + Object.values(D.RELICS).map(R => `<div class="bi" style="margin-bottom:5px"><img src="${A.iconURL(R.icon, 32)}"><span>${R.name}</span><em>${R.desc}</em></div>`).join('') + `</div>`);
   // 우두머리 도감: 1~5장 우두머리는 늘 보이고, 백귀야행 전용은 만나야 공개
   const bcard = ([k, B]) => { const seen = !B.night || (SV.bseen || {})[k]; return `<div class="bi" style="margin-bottom:5px"><img src="${A.bossPortrait(k, 64).toDataURL()}" style="width:48px;height:48px;${seen ? '' : 'filter:brightness(0) opacity(.55)'}"><span>${seen ? B.name : '???'}</span><em>${seen ? B.sub : '백귀야행에서 만날 수 있어요'}</em></div>`; };
@@ -383,7 +383,7 @@ function renderSettings() {
   $$('#langrow button').forEach(b => b.classList.toggle('on', b.dataset.l === (window.I18N ? I18N.lang : 'ko')));
   if (window.NATIVE && NATIVE.on) { const ab = $('#adfree'); ab.textContent = SV.adfree ? '광고 제거됨 ✔' : '광고 제거 · ' + (NATIVE.price || '$1.99'); $('#adnote').classList.add('hide'); }
   // 토글 스위치: 켜지면 금색으로 오른쪽
-  for (const [id, on] of [['sndbtn', !!SV.snd], ['bgmbtn', SV.bgm !== false], ['vibbtn', !!SV.vib], ['numbtn', !!SV.nums], ['shkbtn', SV.shake !== false], ['qbtn', !!lowQ]]) { const b = $('#' + id); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }
+  for (const [id, on] of [['sndbtn', !!SV.snd], ['bgmbtn', SV.bgm !== false], ['vibbtn', !!SV.vib], ['numbtn', !!SV.nums], ['shkbtn', SV.shake !== false], ['qbtn', !!lowQ || qStep >= 2]]) { const b = $('#' + id); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }
   const st = RK.state(), cb = $('#cloudbtn'), ci = $('#cloudinfo');
   if (!st.avail) { cb.textContent = '클라우드 저장 (연결 중…)'; cb.disabled = true; ci.textContent = st.err || ''; }
   else if (!st.user) { cb.textContent = 'Google 로그인 · 클라우드 저장'; cb.disabled = false; cb.onclick = () => RK.login(); ci.textContent = '로그인하면 다른 기기에서도 이어서 할 수 있어요 (랭킹과 같은 계정)'; }
@@ -402,7 +402,7 @@ $('#bgmbtn').onclick = () => { SV.bgm = SV.bgm === false; otherMusic = false; sa
 $('#vibbtn').onclick = () => { SV.vib = !SV.vib; save(); renderSettings(); };
 $('#numbtn').onclick = () => { SV.nums = !SV.nums; save(); renderSettings(); };
 $('#shkbtn').onclick = () => { SV.shake = SV.shake === false; save(); renderSettings(); };
-$('#qbtn').onclick = () => { lowQ = !lowQ; resize(); renderSettings(); };
+$('#qbtn').onclick = () => { lowQ = !(lowQ || qStep >= 2); qStep = 0; SV.qLock = true; SV.lowQ = lowQ; save(); resize(); renderSettings(); };
 $('#adfree').onclick = async () => {
   if (!(window.NATIVE && NATIVE.on)) return toast('스토어 출시 후 구매할 수 있어요');
   if (SV.adfree) return toast('이미 광고가 제거됐어요');
@@ -454,10 +454,10 @@ RK.init(() => { if (RK.state().loginErr) { toast(RK.state().loginErr, 6000); RK.
 
 /* ───── 게임 ───── */
 const cv = $('#cv'), ctx = cv.getContext('2d');
-let lowQ = false, slowT = 0;
+let lowQ = !!SV.lowQ, slowT = 0, qStep = 0;   // v4.1.4 qStep: 자동으로 낮춘 단계 (0 = 그대로, 1 = 조금, 2 = 저화질)
 let S = null, W = 0, H = 0, K = 1, DPR = 1, runId = null, running = false, last = 0, hudT = 0, tutT = 0;
 function resize() {
-  const r = $('#app').getBoundingClientRect(); DPR = Math.min(lowQ ? 1 : 1.5, window.devicePixelRatio || 1);
+  const r = $('#app').getBoundingClientRect(); DPR = Math.min(lowQ ? 1 : qStep >= 2 ? 1 : qStep === 1 ? 1.25 : 1.5, window.devicePixelRatio || 1);
   W = r.width; H = r.height; cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
   K = Math.max(0.8, Math.min(2.2, Math.sqrt(W * H / (340 * 660))));
   A.setDpr(DPR * K);
@@ -535,7 +535,8 @@ function loop(now) {
   else if (FEEL.slow > 0) { FEEL.slow -= Math.min(0.05, raw0); raw = raw0 * 0.3; }   // 우두머리 처치 슬로모션
   const dt = Math.min(0.05, raw); FEEL.dt = Math.min(0.05, raw0);
   // 느린 기기면 자동으로 해상도를 낮춰요
-  if (!lowQ && !paused && !modal && raw0 < 0.5 && raw > 0) { slowT = raw > 0.026 ? slowT + raw : Math.max(0, slowT - raw * 0.5); if (slowT > 2.5) { lowQ = true; resize(); } }
+  // v4.1.4: 앱(웹뷰)에서 너무 쉽게 저화질로 떨어지던 문제 → 30fps 아래가 4초 넘게 이어질 때만, 한 단계씩, 설정에서 직접 고르면 자동 조정 안 함
+  if (!lowQ && !SV.qLock && qStep < 2 && !paused && !modal && raw0 < 0.5 && raw > 0) { slowT = raw > 0.034 ? slowT + raw : Math.max(0, slowT - raw * 0.5); if (slowT > 4) { slowT = 0; qStep++; resize(); if (qStep === 2) toast('기기가 느려 화질을 낮췄어요 · 설정에서 되돌릴 수 있어요'); } }
   if (!paused && !modal) {
     S.viewR = hyp(W, H) / 2 / K + 30; S.vw = W / 2 / K; S.vh = H / 2 / K;   // 화면 절반 크기(월드 단위)
     const inp = input();
@@ -634,8 +635,9 @@ function openLevel(reroll) {
     if (o.kind === 'jin') tag = '<span class="new" style="background:#ff6a3d;color:#fff">진 각성</span>';
     if (o.kind === 'union') tag = '<span class="new" style="background:linear-gradient(90deg,#f2c14e,#ff6a3d);color:#2a1b06">합격기</span>';
     const pair = o.kind === 'w' && o.lv === 1 ? `<p class="pair">진화 짝: ${o.pair}</p>` : '';
+    const upair = o.uni ? `<p class="pair" style="color:#f2c14e">합격기 짝: ${o.uniMate} → ${o.uni}</p>` : '';
     const st = o.set && o.lv === 1 ? `<p class="setl"><span class="setc" style="--c:${o.set.color}">${o.set.name} ${o.set.have}/${o.set.max}</span>${o.set.on ? ` <b style="color:${o.set.color}">세트 효과 발동: ${o.set.on}</b>` : ''}</p>` : '';
-    b.innerHTML = `<img src="${A.iconURL(o.icon, 46, big && o.kind !== 'union')}" alt=""><div><b>${o.name}</b>${tag}<p>${big ? o.from + ' → ' + o.name + ' · ' : ''}${o.desc}</p>${pair}${st}</div>`;
+    b.innerHTML = `<img src="${A.iconURL(o.icon, 46, big && o.kind !== 'union')}" alt=""><div><b>${o.name}</b>${tag}<p>${big ? o.from + ' → ' + o.name + ' · ' : ''}${o.desc}</p>${pair}${upair}${st}</div>`;
     b.onclick = () => { C.pick(S, o); SND.play('click'); if (o.set && o.set.on && o.lv === 1) { toast(`${o.set.name} 세트 ${o.set.have}개 · ${o.set.on}`); SND.play('evo'); } $('#m-lvl').classList.add('hide'); modal = null; last = performance.now(); slotSig = ''; events(); };
     box.appendChild(b);
   }
@@ -1121,7 +1123,7 @@ A.loadImages('img/', () => { setCoin(); if (!$('#s-menu').classList.contains('hi
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !(window.NATIVE && NATIVE.on)) navigator.serviceWorker.register('sw.js').catch(() => {});   // 앱은 파일이 내장돼 있어 필요 없음
 go('menu');
 (() => {   // 버전 표시: data·core·app 중 하나라도 다르면 빨갛게 (일부 파일만 올라간 배포를 바로 알 수 있게)
-  const APP_V = '4.1.3', el = $('#verlab'); if (!el) return;
+  const APP_V = '4.1.4', el = $('#verlab'); if (!el) return;
   const bad = [['data', D.VERSION], ['core', C.V || '?']].filter(q => q[1] !== APP_V);
   el.textContent = 'v' + APP_V + (bad.length ? ' ⚠ ' + bad.map(q => q[0] + ' ' + q[1]).join(' · ') : '');
   if (bad.length) { el.style.color = '#ff8a7a'; el.style.opacity = 1; }

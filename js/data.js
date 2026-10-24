@@ -1,7 +1,7 @@
 /* 퇴마 서바이벌 — 게임 데이터. 밸런스 숫자는 전부 여기서 고칩니다. */
 (function (G) {
 const D = {};
-D.VERSION = '4.1.3';
+D.VERSION = '4.1.4';
 
 /* ───── 주인공 ─────
    unlock: 해금 조건 (없으면 처음부터) */
@@ -288,7 +288,8 @@ D.WEAPONS = {
     up: ['피해 +6', '방패 +1, 빨라짐', '피해 +8, 반경 증가', '피해 +8, 방패 +1'],
     evo: { name: '천하대장군', with: 'armor', desc: '큰 방패 넷이 돌며 막은 탄을 되받아쳐요', s: { dmg: 55, n: 4, rad: 68, rot: 3.4, hitcd: 0.35, kb: 120, big: true, reflect: true } } },
 };
-/* ───── 합격기: 진화한 두 무기를 함께 가진 채 보물 상자를 열면 하나로 합쳐짐 (칸 하나가 비어요) ───── */
+/* ───── 합격기: 짝 무기 둘 중 하나는 진화 + 다른 하나는 5레벨이면 레벨업·보물 상자에서 하나로 합쳐짐 (칸 하나가 비어요) ───── */
+D.UNION_BIAS = +(typeof process !== 'undefined' && process.env && process.env.UBIAS || 1.25);   // v4.1.4: 가진 무기의 합격기 짝 무기가 선택지에 나올 확률 배수
 D.UNIONS = {
   u_thunder: { name: '뇌정부', a: 'talisman', b: 'thunder', desc: '부적 8장이 꿰뚫고, 맞은 자리마다 벼락이 떨어져요',
     s: { dmg: 30, cd: 0.45, n: 8, pierce: 99, spd: 420, bolt: 40, br: 50 } },
